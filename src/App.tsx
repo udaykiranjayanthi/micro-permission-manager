@@ -1,14 +1,18 @@
-import { useState } from "react";
-import MicroPermissionPrompter from "./components/MicroPermissionPrompter";
+import { useEffect, useState } from "react";
+import Popup from "./components/Popup";
 import "./styles/common.scss";
 
 const App = () => {
   // Theme toggle (for demo purposes)
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
   };
 
   return (
@@ -31,7 +35,7 @@ const App = () => {
       </div>
 
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <MicroPermissionPrompter />
+        <Popup />
       </div>
     </div>
   );
