@@ -8,7 +8,9 @@ import {
 import ThemeToggle from "./ThemeToggle/ThemeToggle";
 
 type Permission = {
+  key: string;
   name: string;
+  emoji: string;
   status: string;
   scope?: string;
 };
@@ -28,9 +30,11 @@ const Popup: React.FC<PopupProps> = ({}) => {
     if (storedPermissions.length > 0) {
       setPermissions(storedPermissions);
     } else {
-      const defaultPermissions: Permission[] = Object.values(CONFIG).map(
-        (permission) => ({
+      const defaultPermissions: Permission[] = Object.entries(CONFIG).map(
+        ([key, permission]) => ({
+          key,
           name: permission.name,
+          emoji: permission.emoji,
           status: PERMISSION_STATUS.DENIED,
         })
       );
@@ -103,9 +107,9 @@ const Popup: React.FC<PopupProps> = ({}) => {
         <div className={styles.tabInfo}>Current Tab: {currentTab}</div>
 
         {permissions.map((permission) => (
-          <div key={permission.name} className={styles.permissionItem}>
+          <div key={permission.key} className={styles.permissionItem}>
             <div className={styles.permissionName}>
-              {permission.name}:
+              {permission.emoji} {permission.name}:
               <span
                 className={`${styles.status} ${
                   permission.status === PERMISSION_STATUS.ALLOWED
