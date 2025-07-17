@@ -5,6 +5,7 @@ import {
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
 } from "../../common/constants";
+import ThemeToggle from "./ThemeToggle/ThemeToggle";
 
 type Permission = {
   name: string;
@@ -94,7 +95,8 @@ const Popup: React.FC<PopupProps> = ({}) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Micro-Permission Prompter</h2>
+        <h2>Permission Manager Extension</h2>
+        <ThemeToggle />
       </div>
 
       <div className={styles.content}>

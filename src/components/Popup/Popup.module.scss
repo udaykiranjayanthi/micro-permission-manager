@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';
+@import "../../styles/variables.scss";
 
 .container {
   width: 320px;
@@ -14,7 +14,10 @@
   background-color: var(--surface-color);
   padding: $spacing-md $spacing-lg;
   border-bottom: 1px solid var(--border-color);
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
   h2 {
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
@@ -33,9 +36,9 @@
   color: var(--text-secondary);
   display: flex;
   align-items: center;
-  
+
   &::before {
-    content: '';
+    content: "";
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -50,23 +53,23 @@
   justify-content: space-between;
   align-items: center;
   padding: $spacing-sm 0;
-  
+
   .permissionName {
     display: flex;
     align-items: center;
     font-weight: $font-weight-medium;
     color: var(--text-primary);
-    
+
     .status {
       margin-left: $spacing-md;
       font-size: $font-size-sm;
       font-weight: $font-weight-normal;
       color: var(--text-secondary);
-      
+
       &.allowed {
         color: var(--success-color);
       }
-      
+
       &.denied {
         color: var(--danger-color);
       }
@@ -83,7 +86,7 @@
 .footer {
   padding: $spacing-md $spacing-lg;
   border-top: 1px solid var(--border-color);
-  
+
   .footerItem {
     display: flex;
     align-items: center;
@@ -91,11 +94,11 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: color $transition-fast;
-    
+
     &:hover {
       color: var(--accent-color);
     }
-    
+
     .icon {
       margin-right: $spacing-sm;
     }
@@ -111,20 +114,20 @@
   transition: all $transition-fast;
   border: none;
   outline: none;
-  
+
   &.allow {
     background-color: var(--success-color);
     color: white;
-    
+
     &:hover {
       background-color: darken(#34c759, 5%);
     }
   }
-  
+
   &.revoke {
     background-color: var(--danger-color);
     color: white;
-    
+
     &:hover {
       background-color: darken(#ff3b30, 5%);
     }
