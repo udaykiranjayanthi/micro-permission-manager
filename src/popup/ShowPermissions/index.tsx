@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Popup.module.scss";
+import styles from "./styles.module.scss";
 import {
   CONFIG,
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
 } from "../../common/constants";
-import ThemeToggle from "./ThemeToggle/ThemeToggle";
+import ThemeToggle from "./ThemeToggle";
 
 type Permission = {
   key: string;
@@ -15,10 +15,10 @@ type Permission = {
   scope?: string;
 };
 
-interface PopupProps {}
+interface ShowPermissionsProps {}
 
-const Popup: React.FC<PopupProps> = ({}) => {
-  // Sample data for the Popup component
+const ShowPermissions: React.FC<ShowPermissionsProps> = ({}) => {
+  // Sample data for the ShowPermissions component
   const currentTab = window.location.host;
   const [permissions, setPermissions] = useState<Permission[]>([]);
 
@@ -157,4 +157,4 @@ const Popup: React.FC<PopupProps> = ({}) => {
   );
 };
 
-export default Popup;
+export default ShowPermissions;

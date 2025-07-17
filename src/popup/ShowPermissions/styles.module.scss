@@ -1,10 +1,12 @@
 @import "../../styles/variables.scss";
 
+// Use a card-like container similar to the common card component
 .container {
   width: 320px;
-  border-radius: var(--card-radius);
   overflow: hidden;
+  // Extend card properties without the padding (we'll control padding in child elements)
   background-color: var(--card-background);
+  border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
   font-family: $font-family-base;
@@ -14,6 +16,7 @@
   background-color: var(--surface-color);
   padding: $spacing-md $spacing-lg;
   border-bottom: 1px solid var(--border-color);
+  // Using the flex-between utility concept from common.scss
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -49,6 +52,7 @@
 }
 
 .permissionItem {
+  // Using flex-between concept from common.scss
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,6 +81,7 @@
   }
 }
 
+// Reusing the divider concept from common.scss
 .divider {
   height: 1px;
   background-color: var(--border-color);
@@ -105,7 +110,9 @@
   }
 }
 
+// Button styles that extend the common button concept but with specific variants
 .button {
+  // Base button properties
   padding: $spacing-xs $spacing-md;
   border-radius: var(--control-radius);
   font-size: $font-size-sm;
@@ -115,6 +122,7 @@
   border: none;
   outline: none;
 
+  // Specific variants for this component
   &.allow {
     background-color: var(--success-color);
     color: white;

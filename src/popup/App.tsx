@@ -1,5 +1,5 @@
-import Popup from "./components/Popup";
-import "./styles/common.scss";
+import Popup from "./ShowPermissions";
+import "../styles/common.scss";
 
 const App = () => {
   return (
