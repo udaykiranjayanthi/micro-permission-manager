@@ -9,6 +9,7 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "@rsbuild/plugin-sass": "^1.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
