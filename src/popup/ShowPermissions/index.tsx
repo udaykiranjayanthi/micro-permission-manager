@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import styles from "./styles.module.scss";
 import {
   CONFIG,
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
 } from "../../common/constants";
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle from "./ThemeToggle/index";
 
 type Permission = {
   key: string;
@@ -97,24 +96,24 @@ const ShowPermissions: React.FC<ShowPermissionsProps> = ({}) => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <h2>Permission Manager Extension</h2>
         <ThemeToggle />
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.tabInfo}>Current Tab: {currentTab}</div>
+      <div className="content">
+        <div className="tabInfo">Current Tab: {currentTab}</div>
 
         {permissions.map((permission) => (
-          <div key={permission.key} className={styles.permissionItem}>
-            <div className={styles.permissionName}>
+          <div key={permission.key} className="permissionItem">
+            <div className="permissionName">
               {permission.emoji} {permission.name}:
               <span
-                className={`${styles.status} ${
+                className={`status ${
                   permission.status === PERMISSION_STATUS.ALLOWED
-                    ? styles.allowed
-                    : styles.denied
+                    ? "allowed"
+                    : "denied"
                 }`}
               >
                 {permission.status === PERMISSION_STATUS.ALLOWED
@@ -123,10 +122,10 @@ const ShowPermissions: React.FC<ShowPermissionsProps> = ({}) => {
               </span>
             </div>
             <button
-              className={`${styles.button} ${
+              className={`button ${
                 permission.status === PERMISSION_STATUS.ALLOWED
-                  ? styles.revoke
-                  : styles.allow
+                  ? "revoke"
+                  : "allow"
               }`}
               onClick={() =>
                 permission.status === PERMISSION_STATUS.ALLOWED
@@ -142,15 +141,15 @@ const ShowPermissions: React.FC<ShowPermissionsProps> = ({}) => {
         ))}
       </div>
 
-      <div className={styles.footer}>
-        <div className={styles.footerItem} onClick={handleSettings}>
-          <span className={styles.icon}>⚙️</span> Settings
+      <div className="footer">
+        <div className="footerItem" onClick={handleSettings}>
+          <span className="icon">⚙️</span> Settings
         </div>
-        <div className={styles.footerItem} onClick={handleViewHistory}>
-          <span className={styles.icon}>📜</span> View History
+        <div className="footerItem" onClick={handleViewHistory}>
+          <span className="icon">📜</span> View History
         </div>
-        <div className={styles.footerItem} onClick={handleClearAll}>
-          <span className={styles.icon}>🧹</span> Clear All Permissions
+        <div className="footerItem" onClick={handleClearAll}>
+          <span className="icon">🧹</span> Clear All Permissions
         </div>
       </div>
     </div>

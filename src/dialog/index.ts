@@ -1,50 +1,36 @@
 function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   if (document.getElementById("micro-permission-modal")) return;
 
+  // Create the modal
   const modal = document.createElement("div");
   modal.id = "micro-permission-modal";
-  modal.style.cssText = `
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999999;
-    `;
+  modal.className = "micro-permission-modal";
 
   // Create the dialog container
   const dialogContainer = document.createElement("div");
-  dialogContainer.style.cssText = `
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    font-family: sans-serif;
-    text-align: center;
-  `;
+  dialogContainer.className = "modal-container";
 
   // Create heading
   const heading = document.createElement("h3");
-  heading.style.marginTop = "0";
+  heading.className = "modal-heading";
   heading.textContent = "This site is requesting access";
   dialogContainer.appendChild(heading);
 
   // Create permission text
   const permissionText = document.createElement("p");
   permissionText.id = "micro-permission-text";
+  permissionText.className = "modal-text";
   permissionText.textContent = "Permission: [placeholder]";
   dialogContainer.appendChild(permissionText);
 
   // Create buttons container
   const buttonsContainer = document.createElement("div");
-  buttonsContainer.style.marginTop = "20px";
+  buttonsContainer.className = "modal-buttons";
 
   // Create allow button
   const allowButton = document.createElement("button");
   allowButton.id = "allow-btn";
+  allowButton.className = "modal-button allow";
   allowButton.textContent = "Allow";
   allowButton.addEventListener("click", () => {
     modal.remove();
@@ -55,7 +41,7 @@ function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   // Create deny button
   const denyButton = document.createElement("button");
   denyButton.id = "deny-btn";
-  denyButton.style.marginLeft = "10px";
+  denyButton.className = "modal-button deny";
   denyButton.textContent = "Deny";
   denyButton.addEventListener("click", () => {
     modal.remove();

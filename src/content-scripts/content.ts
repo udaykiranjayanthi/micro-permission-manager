@@ -15,5 +15,5 @@ function injectStyle(fileName: string) {
   (document.head || document.documentElement).appendChild(link);
 }
 
-// injectStyle("styles/common.css");
+injectStyle("./assets/global.css");
 injectScript("injected.js");

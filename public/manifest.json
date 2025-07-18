@@ -18,7 +18,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["injected.js"],
+      "resources": ["injected.js", "assets/*"],
       "matches": ["<all_urls>"]
     }
   ]
