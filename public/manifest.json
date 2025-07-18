@@ -6,5 +6,20 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": "./assets/icon.png"
-  }
+  },
+  "permissions": ["scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -12,6 +12,19 @@ export default defineConfig({
   source: {
     entry: {
       popup: "./src/popup/index.tsx",
+      content: {
+        import: "./src/content-scripts/content.ts",
+        html: false,
+        filename: "content.js",
+      },
+      injected: {
+        import: "./src/content-scripts/injected.ts",
+        html: false,
+        filename: "injected.js",
+      },
     },
+  },
+  output: {
+    cleanDistPath: true,
   },
 });
