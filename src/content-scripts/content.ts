@@ -7,5 +7,13 @@ function injectScript(fileName: string) {
   (document.head || document.documentElement).appendChild(script);
 }
 
-console.log("Trying to inject script");
+function injectStyle(fileName: string) {
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.type = "text/css";
+  link.href = chrome.runtime.getURL(fileName);
+  (document.head || document.documentElement).appendChild(link);
+}
+
+// injectStyle("styles/common.css");
 injectScript("injected.js");
