@@ -1,4 +1,4 @@
-import { showPermissionModal } from "../dialog";
+import { showPermissionModal } from "./dialog";
 
 // (function overrideGeolocation(): void {
 //   const original = navigator.geolocation.getCurrentPosition.bind(
