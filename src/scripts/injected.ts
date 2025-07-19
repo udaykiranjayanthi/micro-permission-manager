@@ -47,9 +47,8 @@ const setPermission = (service: string, data: ServicePermission) => {
 window.addEventListener("FROM_EXTENSION", (event: Event) => {
   const customEvent = event as CustomEvent<{ type: string; value: any }>;
 
-  if (customEvent.detail.type === "HOST_PERMISSIONS") {
-    console.log("Storage value received:", customEvent.detail.value);
-    hostPermissions = customEvent.detail.value as HostPermissions;
+  if (customEvent.detail.type === "SEND_HOST_PERMISSIONS") {
+    hostPermissions = (customEvent.detail.value as HostPermissions) ?? {};
   }
 });
 
@@ -60,22 +59,20 @@ function overrideMedia(): void {
 
   Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
     value: async (...args: Parameters<MediaDevices["getUserMedia"]>) => {
-      console.log("Intercepted media request", args);
-
       // audio
       const audioConstraints = args[0]?.audio;
       // video
       const videoConstraints = args[0]?.video;
 
-      if (audioConstraints && hostPermissions) {
-        console.log(hostPermissions[PERMISSION_NAMES.MICROPHONE]);
-
+      if (
+        audioConstraints &&
+        hostPermissions[PERMISSION_NAMES.MICROPHONE]?.status !==
+          PERMISSION_STATUS.ALLOWED
+      ) {
         const response = await showPermissionModal(
           PERMISSION_NAMES.MICROPHONE,
           hostPermissions
         );
-
-        console.log("setting permission microphone", response);
 
         setPermission(PERMISSION_NAMES.MICROPHONE, {
           status: response.status,
@@ -89,15 +86,16 @@ function overrideMedia(): void {
         return original(...args);
       }
 
-      if (videoConstraints && hostPermissions) {
-        console.log(hostPermissions[PERMISSION_NAMES.CAMERA]);
-
+      if (
+        videoConstraints &&
+        hostPermissions[PERMISSION_NAMES.CAMERA]?.status !==
+          PERMISSION_STATUS.ALLOWED
+      ) {
         const response = await showPermissionModal(
           PERMISSION_NAMES.CAMERA,
           hostPermissions
         );
 
-        console.log("setting permission camera", response);
         setPermission(PERMISSION_NAMES.CAMERA, {
           status: response.status,
           scope: response.scope,
@@ -110,15 +108,11 @@ function overrideMedia(): void {
         return original(...args);
       }
 
-      console.log("final return");
-
       return original(...args);
     },
     configurable: false,
     writable: false,
   });
-
-  console.log("Media override injected.");
 }
 
 overrideMedia();

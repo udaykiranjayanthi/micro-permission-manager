@@ -19,7 +19,7 @@ export const updateHostPermissions = async ({
   const result = await chrome.storage.local.get("permissions");
   const permissions = result.permissions as ExtensionPermissions;
 
-  if (!permissions[hostname]) {
+  if (!permissions?.[hostname]) {
     permissions[hostname] = {};
   }
 
@@ -36,7 +36,7 @@ export const getHostPermissions = async ({
   hostname,
 }: GetHostPermissionsParams) => {
   const result = await chrome.storage.local.get("permissions");
-  const hostPermissions = result.permissions[hostname] as HostPermissions;
+  const hostPermissions = result.permissions?.[hostname] as HostPermissions;
 
   return hostPermissions;
 };

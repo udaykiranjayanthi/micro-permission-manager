@@ -6,15 +6,6 @@ import {
 import { HostPermissions } from "../common/types";
 import { getHostPermissions, updateHostPermissions } from "../common/utils";
 
-// Define types for permissions
-type Permission = {
-  key: string;
-  name: string;
-  emoji: string;
-  status: string;
-  scope?: string;
-};
-
 // Main application code
 document.addEventListener("DOMContentLoaded", function () {
   // ThemeToggle component functionality
@@ -48,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     currentTabSpan.textContent = hostname;
 
-    const hostPermissions = await getHostPermissions({ hostname });
+    const hostPermissions = (await getHostPermissions({ hostname })) ?? {};
 
     renderPermissions(hostPermissions);
     setupEventListeners(hostname);
