@@ -1,8 +1,4 @@
-import {
-  CONFIG,
-  PERMISSION_NAMES,
-  PERMISSION_STATUS,
-} from "../common/constants";
+import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
 import { HostPermissions, ServicePermission } from "../common/types";
 import { showPermissionModal } from "./dialog";
 
@@ -75,7 +71,7 @@ function overrideMedia(): void {
         console.log(hostPermissions[PERMISSION_NAMES.MICROPHONE]);
 
         const response = await showPermissionModal(
-          CONFIG[PERMISSION_NAMES.MICROPHONE].name,
+          PERMISSION_NAMES.MICROPHONE,
           hostPermissions
         );
 
@@ -97,7 +93,7 @@ function overrideMedia(): void {
         console.log(hostPermissions[PERMISSION_NAMES.CAMERA]);
 
         const response = await showPermissionModal(
-          CONFIG[PERMISSION_NAMES.CAMERA].name,
+          PERMISSION_NAMES.CAMERA,
           hostPermissions
         );
 

@@ -1,14 +1,26 @@
-// injected.ts
-
-import { PERMISSION_SCOPES, PERMISSION_STATUS } from "../common/constants";
+import { v4 as uuidv4 } from "uuid";
+import {
+  CONFIG,
+  PERMISSION_SCOPES,
+  PERMISSION_STATUS,
+} from "../common/constants";
 import { HostPermissions, ServicePermission } from "../common/types";
 
+// Interface for permission request with resolver
+interface PermissionRequest {
+  id: string;
+  type: string;
+  resolver: (data: ServicePermission) => void;
+}
+
+// Store active permission requests
+const activePermissionRequests: PermissionRequest[] = [];
+
 async function injectModalHtml(
+  permissionType: string,
   onPermissionChoice: (data: ServicePermission) => void,
   hostPermissions: HostPermissions
 ): Promise<void> {
-  if (document.getElementById("micro-permission-modal")) return;
-
   // Get theme from storage
   const theme = "dark";
   const isDarkTheme = theme === "dark";
@@ -75,66 +87,156 @@ async function injectModalHtml(
       color: "white",
       marginLeft: "10px",
     },
+    permissionItem: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "8px 12px",
+      borderRadius: "6px",
+      backgroundColor: isDarkTheme
+        ? "rgba(255, 255, 255, 0.05)"
+        : "rgba(0, 0, 0, 0.03)",
+    },
   };
 
-  // Create the modal
-  const modal = document.createElement("div");
-  modal.id = "micro-permission-modal";
-  Object.assign(modal.style, styles.modal);
+  // Check if modal already exists
+  let modal = document.getElementById(
+    "micro-permission-modal"
+  ) as HTMLDivElement;
+  let dialogContainer: HTMLDivElement;
+  let permissionsContainer: HTMLDivElement;
 
-  // Create the dialog container
-  const dialogContainer = document.createElement("div");
-  Object.assign(dialogContainer.style, styles.container);
+  // Create or get existing modal
+  if (!modal) {
+    // Create the modal
+    modal = document.createElement("div");
+    modal.id = "micro-permission-modal";
+    Object.assign(modal.style, styles.modal);
 
-  // Create heading
-  const heading = document.createElement("h3");
-  Object.assign(heading.style, styles.heading);
-  heading.textContent = "This site is requesting access";
-  dialogContainer.appendChild(heading);
+    // Create the dialog container
+    dialogContainer = document.createElement("div");
+    Object.assign(dialogContainer.style, styles.container);
+
+    // Create heading
+    const heading = document.createElement("h3");
+    Object.assign(heading.style, styles.heading);
+    heading.textContent = "This site is requesting access";
+    dialogContainer.appendChild(heading);
+
+    // Create permissions container
+    permissionsContainer = document.createElement("div");
+    permissionsContainer.id = "permissions-container";
+    Object.assign(permissionsContainer.style, {
+      display: "flex",
+      flexDirection: "column",
+      gap: "12px",
+      marginTop: "16px",
+    });
+    dialogContainer.appendChild(permissionsContainer);
+
+    // Assemble the components
+    modal.appendChild(dialogContainer);
+    document.body.appendChild(modal);
+  } else {
+    // Get existing permissions container
+    permissionsContainer = document.getElementById(
+      "permissions-container"
+    ) as HTMLDivElement;
+  }
+
+  // Generate a unique ID for this permission request
+  const requestId = `permission-${uuidv4()}`;
+
+  // Create permission item container
+  const permissionItem = document.createElement("div");
+  permissionItem.id = requestId;
+  Object.assign(permissionItem.style, styles.permissionItem);
 
   // Create permission text
-  const permissionText = document.createElement("p");
-  permissionText.id = "micro-permission-text";
-  Object.assign(permissionText.style, styles.text);
-  permissionText.textContent = "Permission: [placeholder]";
-  dialogContainer.appendChild(permissionText);
+  const permissionText = document.createElement("div");
+  Object.assign(permissionText.style, {
+    ...styles.text,
+    margin: "0",
+    textAlign: "left",
+  });
+  permissionText.textContent = `${CONFIG[permissionType].emoji} ${CONFIG[permissionType].name}`;
+  permissionItem.appendChild(permissionText);
 
   // Create buttons container
   const buttonsContainer = document.createElement("div");
-  Object.assign(buttonsContainer.style, styles.buttonsContainer);
+  Object.assign(buttonsContainer.style, {
+    display: "flex",
+    gap: "8px",
+  });
 
   // Create allow button
   const allowButton = document.createElement("button");
-  allowButton.id = "allow-btn";
   Object.assign(allowButton.style, { ...styles.button, ...styles.allowButton });
   allowButton.textContent = "Allow";
   allowButton.addEventListener("click", () => {
-    modal.remove();
+    // Remove only this permission item
+    permissionItem.remove();
+
+    // Resolve this specific permission request
     onPermissionChoice({
       status: PERMISSION_STATUS.ALLOWED,
       scope: PERMISSION_SCOPES.TAB,
     });
+
+    // Remove from active requests
+    const index = activePermissionRequests.findIndex(
+      (req) => req.id === requestId
+    );
+    if (index !== -1) {
+      activePermissionRequests.splice(index, 1);
+    }
+
+    // If no more permissions, remove the modal
+    if (permissionsContainer.children.length === 0) {
+      modal.remove();
+    }
   });
   buttonsContainer.appendChild(allowButton);
 
   // Create deny button
   const denyButton = document.createElement("button");
-  denyButton.id = "deny-btn";
   Object.assign(denyButton.style, { ...styles.button, ...styles.denyButton });
   denyButton.textContent = "Deny";
   denyButton.addEventListener("click", () => {
-    modal.remove();
+    // Remove only this permission item
+    permissionItem.remove();
+
+    // Resolve this specific permission request
     onPermissionChoice({
       status: PERMISSION_STATUS.DENIED,
       scope: null,
     });
+
+    // Remove from active requests
+    const index = activePermissionRequests.findIndex(
+      (req) => req.id === requestId
+    );
+    if (index !== -1) {
+      activePermissionRequests.splice(index, 1);
+    }
+
+    // If no more permissions, remove the modal
+    if (permissionsContainer.children.length === 0) {
+      modal.remove();
+    }
   });
   buttonsContainer.appendChild(denyButton);
 
-  // Assemble the components
-  dialogContainer.appendChild(buttonsContainer);
-  modal.appendChild(dialogContainer);
-  document.body.appendChild(modal);
+  // Assemble the permission item
+  permissionItem.appendChild(buttonsContainer);
+  permissionsContainer.appendChild(permissionItem);
+
+  // Add to active requests
+  activePermissionRequests.push({
+    id: requestId,
+    type: permissionType,
+    resolver: onPermissionChoice,
+  });
 }
 
 export function showPermissionModal(
@@ -142,9 +244,6 @@ export function showPermissionModal(
   hostPermissions: HostPermissions
 ): Promise<ServicePermission> {
   return new Promise((resolve) => {
-    injectModalHtml(resolve, hostPermissions).then(() => {
-      const text = document.getElementById("micro-permission-text");
-      if (text) text.textContent = `Permission: ${permissionType}`;
-    });
+    injectModalHtml(permissionType, resolve, hostPermissions);
   });
 }
