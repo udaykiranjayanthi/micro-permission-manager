@@ -9,16 +9,6 @@ function injectScript(fileName: string) {
   (document.head || document.documentElement).appendChild(script);
 }
 
-function injectStyle(fileName: string) {
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.type = "text/css";
-  link.href = chrome.runtime.getURL(fileName);
-  // link.onload = () => link.remove(); // Clean up
-  console.log(chrome.runtime.getURL(fileName), link);
-  (document.head || document.documentElement).appendChild(link);
-}
-
 window.addEventListener("FROM_PAGE", (event: Event) => {
   const customEvent = event as CustomEvent<{
     type: string;
@@ -66,5 +56,4 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
   }
 });
 
-injectStyle("./static/assets/global.css");
 injectScript("./injected.js");
