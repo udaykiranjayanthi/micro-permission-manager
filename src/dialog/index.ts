@@ -1,5 +1,31 @@
+// injected.ts
+
+// Ask for data from extension
+function getExtensionStorageValue(key: string): Promise<any> {
+  return new Promise((resolve) => {
+    function handleMessage(event: MessageEvent) {
+      if (
+        event.data?.type === "EXTENSION_DATA_RESPONSE" &&
+        event.data.key === key
+      ) {
+        window.removeEventListener("message", handleMessage);
+        resolve(event.data.value);
+      }
+    }
+
+    window.addEventListener("message", handleMessage);
+
+    window.postMessage({ type: "GET_EXTENSION_DATA", key }, "*");
+  });
+}
+
 function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   if (document.getElementById("micro-permission-modal")) return;
+
+  // // Example usage
+  // getExtensionStorageValue("permissions").then((value) => {
+  //   console.log("Received from extension storage:", value);
+  // });
 
   // Create the modal
   const modal = document.createElement("div");

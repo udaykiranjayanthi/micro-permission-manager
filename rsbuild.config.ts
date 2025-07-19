@@ -22,6 +22,11 @@ export default defineConfig({
         html: false,
         filename: "injected.js",
       },
+      background: {
+        import: "./src/background/background.js",
+        html: false,
+        filename: "background.js",
+      },
     },
   },
   output: {

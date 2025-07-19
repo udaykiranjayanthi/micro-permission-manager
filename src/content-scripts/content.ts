@@ -12,8 +12,12 @@ function injectStyle(fileName: string) {
   link.rel = "stylesheet";
   link.type = "text/css";
   link.href = chrome.runtime.getURL(fileName);
+  // link.onload = () => link.remove(); // Clean up
+  console.log(chrome.runtime.getURL(fileName), link);
   (document.head || document.documentElement).appendChild(link);
 }
 
 injectStyle("./assets/global.css");
 injectScript("injected.js");
+
+chrome.storage;

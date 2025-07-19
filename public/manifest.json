@@ -7,7 +7,7 @@
     "default_popup": "popup.html",
     "default_icon": "./assets/icon.png"
   },
-  "permissions": ["scripting", "tabs"],
+  "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
@@ -21,5 +21,8 @@
       "resources": ["injected.js", "assets/*"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }
