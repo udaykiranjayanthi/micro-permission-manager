@@ -1,5 +1,8 @@
-console.log("runnning in the background");
+import { ExtensionPermissions } from "../common/types";
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ permissions: [] });
+  const defaultState: { permissions: ExtensionPermissions } = {
+    permissions: {},
+  };
+  chrome.storage.local.set(defaultState);
 });

@@ -1,5 +1,8 @@
 // injected.ts
 
+import { PERMISSION_SCOPES, PERMISSION_STATUS } from "../common/constants";
+import { HostPermissions, ServicePermission } from "../common/types";
+
 // Ask for data from extension
 function getExtensionStorageValue(key: string): Promise<any> {
   return new Promise((resolve) => {
@@ -19,7 +22,10 @@ function getExtensionStorageValue(key: string): Promise<any> {
   });
 }
 
-function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
+function injectModalHtml(
+  onPermissionChoice: (data: ServicePermission) => void,
+  hostPermissions: HostPermissions
+): void {
   if (document.getElementById("micro-permission-modal")) return;
 
   // // Example usage
@@ -60,7 +66,10 @@ function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   allowButton.textContent = "Allow";
   allowButton.addEventListener("click", () => {
     modal.remove();
-    onPermissionChoice(true);
+    onPermissionChoice({
+      status: PERMISSION_STATUS.ALLOWED,
+      scope: PERMISSION_SCOPES.TAB,
+    });
   });
   buttonsContainer.appendChild(allowButton);
 
@@ -71,7 +80,10 @@ function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   denyButton.textContent = "Deny";
   denyButton.addEventListener("click", () => {
     modal.remove();
-    onPermissionChoice(false);
+    onPermissionChoice({
+      status: PERMISSION_STATUS.DENIED,
+      scope: null,
+    });
   });
   buttonsContainer.appendChild(denyButton);
 
@@ -81,9 +93,12 @@ function injectModalHtml(onPermissionChoice: (allowed: boolean) => void): void {
   document.body.appendChild(modal);
 }
 
-export function showPermissionModal(permissionType: string): Promise<boolean> {
+export function showPermissionModal(
+  permissionType: string,
+  hostPermissions: HostPermissions
+): Promise<ServicePermission> {
   return new Promise((resolve) => {
-    injectModalHtml(resolve);
+    injectModalHtml(resolve, hostPermissions);
     const text = document.getElementById("micro-permission-text");
     if (text) text.textContent = `Permission: ${permissionType}`;
   });

@@ -1,3 +1,9 @@
+import {
+  CONFIG,
+  PERMISSION_NAMES,
+  PERMISSION_STATUS,
+} from "../common/constants";
+import { HostPermissions, ServicePermission } from "../common/types";
 import { showPermissionModal } from "./dialog";
 
 // (function overrideGeolocation(): void {
@@ -18,6 +24,39 @@ import { showPermissionModal } from "./dialog";
 //   console.log("Geolocation override injected.");
 // })();
 
+const hostname = window.location.hostname;
+let hostPermissions: HostPermissions = {};
+
+window.dispatchEvent(
+  new CustomEvent("FROM_PAGE", {
+    detail: {
+      type: "GET_HOST_PERMISSIONS",
+      hostname,
+    },
+  })
+);
+
+const setPermission = (service: string, data: ServicePermission) => {
+  window.dispatchEvent(
+    new CustomEvent("FROM_PAGE", {
+      detail: {
+        type: "SET_HOST_PERMISSIONS",
+        hostname,
+        payload: { service, data },
+      },
+    })
+  );
+};
+
+window.addEventListener("FROM_EXTENSION", (event: Event) => {
+  const customEvent = event as CustomEvent<{ type: string; value: any }>;
+
+  if (customEvent.detail.type === "HOST_PERMISSIONS") {
+    console.log("Storage value received:", customEvent.detail.value);
+    hostPermissions = customEvent.detail.value as HostPermissions;
+  }
+});
+
 function overrideMedia(): void {
   const original = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices
@@ -25,14 +64,35 @@ function overrideMedia(): void {
 
   Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
     value: (...args: Parameters<MediaDevices["getUserMedia"]>) => {
-      console.log("Intercepted media request");
+      console.log("Intercepted media request", args);
 
-      showPermissionModal("Media").then((allowed) => {
-        if (!allowed) {
-          return;
-        }
-        return original(...args);
-      });
+      // audio
+      const audioConstraints = args[0]?.audio;
+      // video
+      const videoConstraints = args[0]?.video;
+
+      if (audioConstraints && hostPermissions) {
+        console.log(hostPermissions[PERMISSION_NAMES.MICROPHONE]);
+
+        showPermissionModal(
+          CONFIG[PERMISSION_NAMES.MICROPHONE].name,
+          hostPermissions
+        ).then((response: ServicePermission) => {
+          console.log("setting permission", response);
+          setPermission(PERMISSION_NAMES.MICROPHONE, {
+            status: response.status,
+            scope: response.scope,
+          });
+
+          if (response.status === PERMISSION_STATUS.DENIED) {
+            return;
+          }
+
+          return original(...args);
+        });
+      }
+
+      return original(...args);
     },
     configurable: false,
     writable: false,
