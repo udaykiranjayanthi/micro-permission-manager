@@ -18,7 +18,7 @@ import { showPermissionModal } from "./dialog";
 //   console.log("Geolocation override injected.");
 // })();
 
-(function overrideMedia(): void {
+function overrideMedia(): void {
   const original = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices
   );
@@ -39,4 +39,6 @@ import { showPermissionModal } from "./dialog";
   });
 
   console.log("Media override injected.");
-})();
+}
+
+overrideMedia();

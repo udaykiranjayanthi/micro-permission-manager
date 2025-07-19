@@ -12,17 +12,17 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["./scripts/content.js"],
+      "js": ["./content.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["./scripts/injected.js", "./static/assets/*"],
+      "resources": ["injected.js", "static/assets/*"],
       "matches": ["<all_urls>"]
     }
   ],
   "background": {
-    "service_worker": "./scripts/background.js"
+    "service_worker": "./background.js"
   }
 }

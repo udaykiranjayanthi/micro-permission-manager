@@ -17,7 +17,5 @@ function injectStyle(fileName: string) {
   (document.head || document.documentElement).appendChild(link);
 }
 
-injectStyle("./assets/global.css");
-injectScript("injected.js");
-
-chrome.storage;
+injectStyle("./static/assets/global.css");
+injectScript("./injected.js");
