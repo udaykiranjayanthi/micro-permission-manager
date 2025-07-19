@@ -63,7 +63,7 @@ function overrideMedia(): void {
   );
 
   Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
-    value: (...args: Parameters<MediaDevices["getUserMedia"]>) => {
+    value: async (...args: Parameters<MediaDevices["getUserMedia"]>) => {
       console.log("Intercepted media request", args);
 
       // audio
@@ -74,23 +74,47 @@ function overrideMedia(): void {
       if (audioConstraints && hostPermissions) {
         console.log(hostPermissions[PERMISSION_NAMES.MICROPHONE]);
 
-        showPermissionModal(
+        const response = await showPermissionModal(
           CONFIG[PERMISSION_NAMES.MICROPHONE].name,
           hostPermissions
-        ).then((response: ServicePermission) => {
-          console.log("setting permission", response);
-          setPermission(PERMISSION_NAMES.MICROPHONE, {
-            status: response.status,
-            scope: response.scope,
-          });
+        );
 
-          if (response.status === PERMISSION_STATUS.DENIED) {
-            return;
-          }
+        console.log("setting permission", response);
 
-          return original(...args);
+        setPermission(PERMISSION_NAMES.MICROPHONE, {
+          status: response.status,
+          scope: response.scope,
         });
+
+        if (response.status === PERMISSION_STATUS.DENIED) {
+          return;
+        }
+
+        return original(...args);
       }
+
+      if (videoConstraints && hostPermissions) {
+        console.log(hostPermissions[PERMISSION_NAMES.CAMERA]);
+
+        const response = await showPermissionModal(
+          CONFIG[PERMISSION_NAMES.CAMERA].name,
+          hostPermissions
+        );
+
+        console.log("setting permission", response);
+        setPermission(PERMISSION_NAMES.CAMERA, {
+          status: response.status,
+          scope: response.scope,
+        });
+
+        if (response.status === PERMISSION_STATUS.DENIED) {
+          return;
+        }
+
+        return original(...args);
+      }
+
+      console.log("final return");
 
       return original(...args);
     },
