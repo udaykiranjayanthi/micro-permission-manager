@@ -1,4 +1,4 @@
-import { ExtensionPermissions, HostPermissions } from "../common/types";
+import { getHostPermissions, updateHostPermissions } from "../common/utils";
 
 function injectScript(fileName: string) {
   const script = document.createElement("script");
@@ -28,9 +28,9 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
   const { type, hostname, payload } = customEvent.detail;
 
   if (type === "GET_HOST_PERMISSIONS") {
-    chrome.storage.local.get("permissions", (result) => {
-      const hostPermissions = result.permissions[hostname] as HostPermissions;
-
+    getHostPermissions({
+      hostname,
+    }).then((hostPermissions) => {
       window.dispatchEvent(
         new CustomEvent("FROM_EXTENSION", {
           detail: {
@@ -43,25 +43,21 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
   }
 
   if (type === "SET_HOST_PERMISSIONS") {
-    chrome.storage.local.get("permissions", (result) => {
-      const permissions = result.permissions as ExtensionPermissions;
+    const { service, data } = payload;
 
-      if (!permissions[hostname]) {
-        permissions[hostname] = {};
-      }
-
-      console.log("permissions before", hostname, permissions);
-
-      permissions[hostname][payload.service] = payload.data;
-
-      console.log("permissions after", hostname, permissions);
-
-      chrome.storage.local.set({ permissions: permissions }, () => {
+    updateHostPermissions({
+      hostname,
+      service,
+      data,
+    }).then(() => {
+      getHostPermissions({
+        hostname,
+      }).then((hostPermissions) => {
         window.dispatchEvent(
           new CustomEvent("FROM_EXTENSION", {
             detail: {
               type: "SEND_HOST_PERMISSIONS",
-              value: permissions[hostname],
+              value: hostPermissions,
             },
           })
         );

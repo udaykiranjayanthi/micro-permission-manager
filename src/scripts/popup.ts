@@ -3,6 +3,8 @@ import {
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
 } from "../common/constants";
+import { HostPermissions } from "../common/types";
+import { getHostPermissions, updateHostPermissions } from "../common/utils";
 
 // Define types for permissions
 type Permission = {
@@ -36,48 +38,30 @@ document.addEventListener("DOMContentLoaded", function () {
   const clearAllBtn = document.getElementById("clear-all") as HTMLDivElement;
 
   // Initialize the app
-  function initApp(): void {
+  async function initApp(): Promise<void> {
     // Get current tab and permissions
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (tabs.length === 0) return;
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tabs.length === 0) return;
 
-      const url = new URL(tabs[0].url ?? "");
-      const hostname = url.hostname;
+    const url = new URL(tabs[0].url ?? "");
+    const hostname = url.hostname;
 
-      currentTabSpan.textContent = hostname;
-    });
+    currentTabSpan.textContent = hostname;
 
-    let permissions: Permission[] = JSON.parse(
-      localStorage.getItem("permissions") || "[]"
-    );
+    const hostPermissions = await getHostPermissions({ hostname });
 
-    if (permissions.length === 0) {
-      permissions = Object.entries(CONFIG).map(
-        ([key, permission]: [
-          string,
-          { name: string; emoji: string; description: string }
-        ]) => ({
-          key,
-          name: permission.name,
-          emoji: permission.emoji,
-          status: PERMISSION_STATUS.DENIED,
-        })
-      );
-      localStorage.setItem("permissions", JSON.stringify(permissions));
-    }
-
-    renderPermissions(permissions);
-    setupEventListeners(permissions);
+    renderPermissions(hostPermissions);
+    setupEventListeners(hostname);
   }
 
   // Render permissions list
-  function renderPermissions(permissions: Permission[]): void {
-    permissionsContainer.innerHTML = permissions
+  function renderPermissions(hostPermissions: HostPermissions): void {
+    permissionsContainer.innerHTML = Object.entries(hostPermissions)
       .map(
-        (permission) => `
+        ([key, permission]) => `
       <div class="permissionItem">
         <div class="permissionName">
-          ${permission.emoji} ${permission.name}:
+          ${CONFIG[key].emoji} ${CONFIG[key].name}:
           <span class="status ${
             permission.status === PERMISSION_STATUS.ALLOWED
               ? "allowed"
@@ -97,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
           data-action="${
             permission.status === PERMISSION_STATUS.ALLOWED ? "revoke" : "allow"
           }"
-          data-permission="${permission.name}"
+          data-permission="${key}"
         >
           ${
             permission.status === PERMISSION_STATUS.ALLOWED ? "Revoke" : "Allow"
@@ -110,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Setup event listeners
-  function setupEventListeners(permissions: Permission[]): void {
+  function setupEventListeners(hostname: string): void {
     // Theme toggle
     themeToggleBtn.addEventListener("click", () => {
       toggleTheme();
@@ -119,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Footer buttons
     settingsBtn.addEventListener("click", handleSettings);
     viewHistoryBtn.addEventListener("click", handleViewHistory);
-    clearAllBtn.addEventListener("click", () => handleClearAll(permissions));
+    clearAllBtn.addEventListener("click", () => handleClearAll());
 
     // Permission buttons
     document.querySelectorAll("[data-action]").forEach((button) => {
@@ -128,49 +112,39 @@ document.addEventListener("DOMContentLoaded", function () {
         const permissionName = this.getAttribute("data-permission");
 
         if (action === "allow" && permissionName) {
-          handleAllow(permissionName, permissions);
+          handleAllow(hostname, permissionName);
         } else if (action === "revoke" && permissionName) {
-          handleRevoke(permissionName, permissions);
+          handleRevoke(hostname, permissionName);
         }
       });
     });
   }
 
   // Handler functions
-  function handleAllow(
-    permissionName: string,
-    permissions: Permission[]
-  ): void {
-    const updatedPermissions = permissions.map((permission) =>
-      permission.name === permissionName
-        ? {
-            ...permission,
-            status: PERMISSION_STATUS.ALLOWED,
-            scope: PERMISSION_SCOPES.TAB,
-          }
-        : permission
-    );
-    localStorage.setItem("permissions", JSON.stringify(updatedPermissions));
-    renderPermissions(updatedPermissions);
-    setupEventListeners(updatedPermissions);
+  function handleAllow(hostname: string, permissionName: string): void {
+    updateHostPermissions({
+      hostname,
+      service: permissionName,
+      data: {
+        status: PERMISSION_STATUS.ALLOWED,
+        scope: PERMISSION_SCOPES.TAB,
+      },
+    }).then(() => {
+      initApp();
+    });
   }
 
-  function handleRevoke(
-    permissionName: string,
-    permissions: Permission[]
-  ): void {
-    const updatedPermissions = permissions.map((permission) =>
-      permission.name === permissionName
-        ? {
-            ...permission,
-            status: PERMISSION_STATUS.DENIED,
-            scope: undefined,
-          }
-        : permission
-    );
-    localStorage.setItem("permissions", JSON.stringify(updatedPermissions));
-    renderPermissions(updatedPermissions);
-    setupEventListeners(updatedPermissions);
+  function handleRevoke(hostname: string, permissionName: string): void {
+    updateHostPermissions({
+      hostname,
+      service: permissionName,
+      data: {
+        status: PERMISSION_STATUS.DENIED,
+        scope: null,
+      },
+    }).then(() => {
+      initApp();
+    });
   }
 
   function handleSettings(): void {
@@ -181,15 +155,8 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("View History clicked");
   }
 
-  function handleClearAll(permissions: Permission[]): void {
-    const updatedPermissions = permissions.map((permission) => ({
-      ...permission,
-      status: PERMISSION_STATUS.DENIED,
-      scope: undefined,
-    }));
-    localStorage.setItem("permissions", JSON.stringify(updatedPermissions));
-    renderPermissions(updatedPermissions);
-    setupEventListeners(updatedPermissions);
+  function handleClearAll(): void {
+    console.log("Clear All clicked");
   }
 
   function toggleTheme(): void {

@@ -79,7 +79,7 @@ function overrideMedia(): void {
           hostPermissions
         );
 
-        console.log("setting permission", response);
+        console.log("setting permission microphone", response);
 
         setPermission(PERMISSION_NAMES.MICROPHONE, {
           status: response.status,
@@ -101,7 +101,7 @@ function overrideMedia(): void {
           hostPermissions
         );
 
-        console.log("setting permission", response);
+        console.log("setting permission camera", response);
         setPermission(PERMISSION_NAMES.CAMERA, {
           status: response.status,
           scope: response.scope,
