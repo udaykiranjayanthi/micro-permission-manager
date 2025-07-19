@@ -75,8 +75,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize the app
   function initApp(): void {
     // Get current tab and permissions
-    const currentTab = window.location.host;
-    currentTabSpan.textContent = currentTab;
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs.length === 0) return;
+
+      const url = new URL(tabs[0].url ?? "");
+      const hostname = url.hostname;
+
+      currentTabSpan.textContent = hostname;
+    });
 
     let permissions: Permission[] = JSON.parse(
       localStorage.getItem("permissions") || "[]"
