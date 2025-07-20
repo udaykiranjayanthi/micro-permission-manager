@@ -8,8 +8,7 @@ export const PERMISSION_NAMES = {
 export const PERMISSION_SCOPES = {
   TAB: "TAB",
   SESSION: "SESSION",
-  ALWAYS: "ALWAYS",
-  DENY: "DENY",
+  DOMAIN: "DOMAIN",
 };
 
 export const PERMISSION_STATUS = {

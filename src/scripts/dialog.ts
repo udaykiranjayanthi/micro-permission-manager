@@ -4,13 +4,13 @@ import {
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
 } from "../common/constants";
-import { HostPermissions, ServicePermission } from "../common/types";
+import { HostPermissions, PermissionData } from "../common/types";
 
 // Interface for permission request with resolver
 interface PermissionRequest {
   id: string;
   type: string;
-  resolver: (data: ServicePermission) => void;
+  resolver: (data: PermissionData) => void;
 }
 
 // Store active permission requests
@@ -18,7 +18,7 @@ const activePermissionRequests: PermissionRequest[] = [];
 
 async function injectModalHtml(
   permissionType: string,
-  onPermissionChoice: (data: ServicePermission) => void,
+  onPermissionChoice: (data: PermissionData) => void,
   hostPermissions: HostPermissions
 ): Promise<void> {
   // Get theme from storage
@@ -209,7 +209,7 @@ async function injectModalHtml(
     // Resolve this specific permission request
     onPermissionChoice({
       status: PERMISSION_STATUS.DENIED,
-      scope: null,
+      scope: PERMISSION_SCOPES.DOMAIN,
     });
 
     // Remove from active requests
@@ -242,7 +242,7 @@ async function injectModalHtml(
 export function showPermissionModal(
   permissionType: string,
   hostPermissions: HostPermissions
-): Promise<ServicePermission> {
+): Promise<PermissionData> {
   return new Promise((resolve) => {
     injectModalHtml(permissionType, resolve, hostPermissions);
   });

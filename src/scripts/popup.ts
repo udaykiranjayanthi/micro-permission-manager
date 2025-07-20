@@ -4,7 +4,12 @@ import {
   PERMISSION_STATUS,
 } from "../common/constants";
 import { HostPermissions } from "../common/types";
-import { getHostPermissions, updateHostPermissions } from "../common/utils";
+import {
+  getCurrentTab,
+  getHostPermissions,
+  getSessionId,
+  updateHostPermissions,
+} from "../common/utils";
 
 // Main application code
 document.addEventListener("DOMContentLoaded", function () {
@@ -31,18 +36,25 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize the app
   async function initApp(): Promise<void> {
     // Get current tab and permissions
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tabs.length === 0) return;
+    const tab = await getCurrentTab();
+    if (!tab) return;
 
-    const url = new URL(tabs[0].url ?? "");
+    const url = new URL(tab.url ?? "");
     const hostname = url.hostname;
+    const tabId = tab.id?.toString() ?? "";
+    const sessionId = await getSessionId();
+
+    console.log(hostname, tabId, sessionId);
 
     currentTabSpan.textContent = hostname;
 
-    const hostPermissions = (await getHostPermissions({ hostname })) ?? {};
+    const hostPermissions =
+      (await getHostPermissions({ hostname, tabId, sessionId })) ?? {};
+
+    console.log("hostPermissions", hostPermissions);
 
     renderPermissions(hostPermissions);
-    setupEventListeners(hostname);
+    setupEventListeners(hostname, tabId, sessionId);
   }
 
   // Render permissions list
@@ -91,7 +103,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Setup event listeners
-  function setupEventListeners(hostname: string): void {
+  function setupEventListeners(
+    hostname: string,
+    tabId: string,
+    sessionId: string
+  ): void {
     // Theme toggle
     themeToggleBtn.addEventListener("click", () => {
       toggleTheme();
@@ -109,36 +125,46 @@ document.addEventListener("DOMContentLoaded", function () {
         const permissionName = this.getAttribute("data-permission");
 
         if (action === "allow" && permissionName) {
-          handleAllow(hostname, permissionName);
+          handleAllow(hostname, tabId, sessionId, permissionName);
         } else if (action === "revoke" && permissionName) {
-          handleRevoke(hostname, permissionName);
+          handleRevoke(hostname, tabId, sessionId, permissionName);
         }
       });
     });
   }
 
   // Handler functions
-  function handleAllow(hostname: string, permissionName: string): void {
+  function handleAllow(
+    hostname: string,
+    tabId: string,
+    sessionId: string,
+    permissionName: string
+  ): void {
     updateHostPermissions({
       hostname,
+      tabId,
+      sessionId,
       service: permissionName,
-      data: {
-        status: PERMISSION_STATUS.ALLOWED,
-        scope: PERMISSION_SCOPES.TAB,
-      },
+      status: PERMISSION_STATUS.ALLOWED,
+      scope: PERMISSION_SCOPES.TAB,
     }).then(() => {
       initApp();
     });
   }
 
-  function handleRevoke(hostname: string, permissionName: string): void {
+  function handleRevoke(
+    hostname: string,
+    tabId: string,
+    sessionId: string,
+    permissionName: string
+  ): void {
     updateHostPermissions({
       hostname,
+      tabId,
+      sessionId,
       service: permissionName,
-      data: {
-        status: PERMISSION_STATUS.DENIED,
-        scope: null,
-      },
+      status: PERMISSION_STATUS.DENIED,
+      scope: PERMISSION_SCOPES.DOMAIN,
     }).then(() => {
       initApp();
     });
