@@ -6,7 +6,7 @@ function injectScript(fileName: string) {
   script.type = "module"; // or 'text/javascript'
   script.onload = () => script.remove(); // Clean up
   console.log(chrome.runtime.getURL(fileName), script);
-  (document.head || document.documentElement).appendChild(script);
+  (document.head || document.documentElement).prepend(script);
 }
 
 window.addEventListener("FROM_PAGE", (event: Event) => {
