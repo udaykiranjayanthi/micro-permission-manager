@@ -47,9 +47,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Render permissions list
   function renderPermissions(hostPermissions: HostPermissions): void {
-    permissionsContainer.innerHTML = Object.entries(hostPermissions)
-      .map(
-        ([key, permission]) => `
+    if (!Object.keys(hostPermissions).length) {
+      permissionsContainer.innerHTML = `<div class="noPermissions">
+      This tab has no permissions.
+    </div>`;
+    } else {
+      permissionsContainer.innerHTML = Object.entries(hostPermissions)
+        .map(
+          ([key, permission]) => `
       <div class="permissionItem">
         <div class="permissionName">
           ${CONFIG[key].emoji} ${CONFIG[key].name}:
@@ -80,8 +85,9 @@ document.addEventListener("DOMContentLoaded", function () {
         </button>
       </div>
     `
-      )
-      .join("");
+        )
+        .join("");
+    }
   }
 
   // Setup event listeners
@@ -154,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
     currentTheme = currentTheme === "light" ? "dark" : "light";
     localStorage.setItem("theme", currentTheme);
     document.documentElement.setAttribute("data-theme", currentTheme);
-    themeToggleBtn.textContent = currentTheme === "light" ? "🌑" : "🌕";
+    themeToggleBtn.textContent = currentTheme === "light" ? "🌘" : "🌖";
   }
 
   // Initialize the application

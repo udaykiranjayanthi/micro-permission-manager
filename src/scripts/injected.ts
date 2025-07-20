@@ -2,24 +2,6 @@ import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
 import { HostPermissions, ServicePermission } from "../common/types";
 import { showPermissionModal } from "./dialog";
 
-// (function overrideGeolocation(): void {
-//   const original = navigator.geolocation.getCurrentPosition.bind(
-//     navigator.geolocation
-//   );
-
-//   Object.defineProperty(navigator.geolocation, "getCurrentPosition", {
-//     value: (...args: Parameters<Geolocation["getCurrentPosition"]>) => {
-//       console.log("Intercepted geolocation request");
-//       // You can add permission prompt logic here
-//       return original(...args);
-//     },
-//     configurable: false,
-//     writable: false,
-//   });
-
-//   console.log("Geolocation override injected.");
-// })();
-
 const hostname = window.location.hostname;
 let hostPermissions: HostPermissions = {};
 
@@ -82,8 +64,6 @@ function overrideMedia(): void {
         if (response.status === PERMISSION_STATUS.DENIED) {
           return;
         }
-
-        return original(...args);
       }
 
       if (
@@ -104,8 +84,39 @@ function overrideMedia(): void {
         if (response.status === PERMISSION_STATUS.DENIED) {
           return;
         }
+      }
 
-        return original(...args);
+      return original(...args);
+    },
+    configurable: false,
+    writable: false,
+  });
+}
+
+function overrideGeolocation(): void {
+  const original = navigator.geolocation.getCurrentPosition.bind(
+    navigator.geolocation
+  );
+
+  Object.defineProperty(navigator.geolocation, "getCurrentPosition", {
+    value: async (...args: Parameters<Geolocation["getCurrentPosition"]>) => {
+      if (
+        hostPermissions[PERMISSION_NAMES.GEOLOCATION]?.status !==
+        PERMISSION_STATUS.ALLOWED
+      ) {
+        const response = await showPermissionModal(
+          PERMISSION_NAMES.GEOLOCATION,
+          hostPermissions
+        );
+
+        setPermission(PERMISSION_NAMES.GEOLOCATION, {
+          status: response.status,
+          scope: response.scope,
+        });
+
+        if (response.status === PERMISSION_STATUS.DENIED) {
+          return;
+        }
       }
 
       return original(...args);
@@ -116,3 +127,4 @@ function overrideMedia(): void {
 }
 
 overrideMedia();
+overrideGeolocation();
