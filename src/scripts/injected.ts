@@ -1,7 +1,6 @@
-import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
 import { HostPermissions, PermissionData } from "../common/types";
+import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
 import { showPermissionModal } from "./dialog";
-import { getSessionId } from "../common/utils";
 
 const hostname = window.location.hostname;
 let sessionId = "";
@@ -23,38 +22,25 @@ window.addEventListener("message", (event) => {
     console.log("Session ID from extension:", sessionId);
   }
 
-  window.dispatchEvent(
-    new CustomEvent("tabSessionReady", {
-      detail: {
-        tabId,
-        sessionId,
-      },
-    })
-  );
+  if (
+    (event.data?.type === "TAB_ID_RESPONSE" ||
+      event.data?.type === "SESSION_ID_RESPONSE") &&
+    tabId &&
+    sessionId
+  ) {
+    console.log("dispatched event", tabId, sessionId);
+    window.dispatchEvent(
+      new CustomEvent("FROM_PAGE", {
+        detail: {
+          type: "GET_HOST_PERMISSIONS",
+          hostname,
+          tabId,
+          sessionId,
+        },
+      })
+    );
+  }
 });
-
-function waitForTabAndSessionId(): Promise<{
-  tabId: number;
-  sessionId: string;
-}> {
-  return new Promise((resolve) => {
-    function listener(event: Event) {
-      const customEvent = event as CustomEvent<{
-        tabId: number;
-        sessionId: string;
-      }>;
-      if (customEvent?.detail?.tabId && customEvent?.detail?.sessionId) {
-        window.removeEventListener("tabSessionReady", listener);
-        resolve({
-          tabId: customEvent.detail.tabId,
-          sessionId: customEvent.detail.sessionId,
-        });
-      }
-    }
-
-    window.addEventListener("tabSessionReady", listener);
-  });
-}
 
 const setPermission = (service: string, data: PermissionData) => {
   console.log("setting permission", service, data, hostname, tabId, sessionId);
@@ -71,36 +57,38 @@ const setPermission = (service: string, data: PermissionData) => {
   );
 };
 
-window.addEventListener("FROM_EXTENSION", (event: Event) => {
-  const customEvent = event as CustomEvent<{ type: string; value: any }>;
+// Create a function to get the latest hostPermissions
+function getHostPermissions(): HostPermissions {
+  return hostPermissions;
+}
 
-  if (customEvent.detail.type === "HOST_PERMISSIONS_RESPONSE") {
-    hostPermissions = (customEvent.detail.value as HostPermissions) ?? {};
-  }
-});
-
-function overrideMedia(): void {
+export function overrideMedia(
+  setPermission: (service: string, data: PermissionData) => void
+): void {
   const original = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices
   );
 
   Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
     value: async (...args: Parameters<MediaDevices["getUserMedia"]>) => {
+      // Get the latest hostPermissions at call time
+      const currentPermissions = getHostPermissions();
+
       // audio
       const audioConstraints = args[0]?.audio;
       // video
       const videoConstraints = args[0]?.video;
 
-      console.log("host permissions", hostPermissions);
+      console.log("interceptor, host permissions", currentPermissions);
 
       if (
         audioConstraints &&
-        hostPermissions[PERMISSION_NAMES.MICROPHONE]?.status !==
+        currentPermissions[PERMISSION_NAMES.MICROPHONE]?.status !==
           PERMISSION_STATUS.ALLOWED
       ) {
         const response = await showPermissionModal(
           PERMISSION_NAMES.MICROPHONE,
-          hostPermissions
+          currentPermissions
         );
 
         setPermission(PERMISSION_NAMES.MICROPHONE, {
@@ -115,12 +103,12 @@ function overrideMedia(): void {
 
       if (
         videoConstraints &&
-        hostPermissions[PERMISSION_NAMES.CAMERA]?.status !==
+        currentPermissions[PERMISSION_NAMES.CAMERA]?.status !==
           PERMISSION_STATUS.ALLOWED
       ) {
         const response = await showPermissionModal(
           PERMISSION_NAMES.CAMERA,
-          hostPermissions
+          currentPermissions
         );
 
         setPermission(PERMISSION_NAMES.CAMERA, {
@@ -140,21 +128,29 @@ function overrideMedia(): void {
   });
 }
 
-function overrideGeolocation(): void {
+export function overrideGeolocation(
+  setPermission: (service: string, data: PermissionData) => void
+): void {
   const original = navigator.geolocation.getCurrentPosition.bind(
     navigator.geolocation
   );
 
   Object.defineProperty(navigator.geolocation, "getCurrentPosition", {
     value: async (...args: Parameters<Geolocation["getCurrentPosition"]>) => {
-      console.log("host permissions", hostPermissions);
+      // Get the latest hostPermissions at call time
+      const currentPermissions = getHostPermissions();
+
+      console.log(
+        "geolocation interceptor, host permissions",
+        currentPermissions
+      );
       if (
-        hostPermissions[PERMISSION_NAMES.GEOLOCATION]?.status !==
+        currentPermissions[PERMISSION_NAMES.GEOLOCATION]?.status !==
         PERMISSION_STATUS.ALLOWED
       ) {
         const response = await showPermissionModal(
           PERMISSION_NAMES.GEOLOCATION,
-          hostPermissions
+          currentPermissions
         );
 
         console.log("calling set permission", response);
@@ -176,22 +172,13 @@ function overrideGeolocation(): void {
   });
 }
 
-(async () => {
-  const { tabId, sessionId } = await waitForTabAndSessionId();
+window.addEventListener("FROM_EXTENSION", (event: Event) => {
+  const customEvent = event as CustomEvent<{ type: string; value: any }>;
 
-  // Now safely proceed using tabId and sessionId
-  console.log("Both received:", tabId, sessionId);
-  window.dispatchEvent(
-    new CustomEvent("FROM_PAGE", {
-      detail: {
-        type: "GET_HOST_PERMISSIONS",
-        hostname,
-        tabId,
-        sessionId,
-      },
-    })
-  );
+  if (customEvent.detail.type === "HOST_PERMISSIONS_RESPONSE") {
+    hostPermissions = (customEvent.detail.value as HostPermissions) ?? {};
+  }
+});
 
-  overrideMedia();
-  overrideGeolocation();
-})();
+overrideMedia(setPermission);
+overrideGeolocation(setPermission);
