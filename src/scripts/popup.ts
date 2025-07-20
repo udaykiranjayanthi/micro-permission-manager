@@ -2,6 +2,7 @@ import {
   CONFIG,
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
+  BUTTONS_CONFIG,
 } from "../common/constants";
 import { HostPermissions } from "../common/types";
 import {
@@ -82,19 +83,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           </span>
         </div>
-        <button 
-          class="button ${
-            permission.status === PERMISSION_STATUS.ALLOWED ? "revoke" : "allow"
-          }"
-          data-action="${
-            permission.status === PERMISSION_STATUS.ALLOWED ? "revoke" : "allow"
-          }"
-          data-permission="${key}"
-        >
-          ${
-            permission.status === PERMISSION_STATUS.ALLOWED ? "Revoke" : "Allow"
-          }
-        </button>
+        ${`<div class="buttons-container">
+            ${Object.entries(BUTTONS_CONFIG)
+              .map(
+                ([
+                  action,
+                  config,
+                ]) => `<button class="button ${config.className}" data-status="${config.status}" data-permission="${key}" data-scope="${config.scope}">
+                ${config.text}
+              </button>`
+              )
+              .join("")}
+          </div>`}
       </div>
     `
         )
@@ -119,52 +119,35 @@ document.addEventListener("DOMContentLoaded", function () {
     clearAllBtn.addEventListener("click", () => handleClearAll());
 
     // Permission buttons
-    document.querySelectorAll("[data-action]").forEach((button) => {
+    document.querySelectorAll("[data-status]").forEach((button) => {
       button.addEventListener("click", function (this: HTMLButtonElement) {
-        const action = this.getAttribute("data-action");
+        const status = this.getAttribute("data-status");
         const permissionName = this.getAttribute("data-permission");
+        const scope = this.getAttribute("data-scope");
 
-        if (action === "allow" && permissionName) {
-          handleAllow(hostname, tabId, sessionId, permissionName);
-        } else if (action === "revoke" && permissionName) {
-          handleRevoke(hostname, tabId, sessionId, permissionName);
-        }
+        if (!status || !permissionName || !scope) return;
+
+        handleClick(hostname, tabId, sessionId, permissionName, status, scope);
       });
     });
   }
 
   // Handler functions
-  function handleAllow(
+  function handleClick(
     hostname: string,
     tabId: string,
     sessionId: string,
-    permissionName: string
+    permissionName: string,
+    status: string,
+    scope: string
   ): void {
     updateHostPermissions({
       hostname,
       tabId,
       sessionId,
       service: permissionName,
-      status: PERMISSION_STATUS.ALLOWED,
-      scope: PERMISSION_SCOPES.TAB,
-    }).then(() => {
-      initApp();
-    });
-  }
-
-  function handleRevoke(
-    hostname: string,
-    tabId: string,
-    sessionId: string,
-    permissionName: string
-  ): void {
-    updateHostPermissions({
-      hostname,
-      tabId,
-      sessionId,
-      service: permissionName,
-      status: PERMISSION_STATUS.DENIED,
-      scope: PERMISSION_SCOPES.DOMAIN,
+      status: status,
+      scope: scope,
     }).then(() => {
       initApp();
     });

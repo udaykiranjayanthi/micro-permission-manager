@@ -1,9 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import {
-  CONFIG,
-  PERMISSION_SCOPES,
-  PERMISSION_STATUS,
-} from "../common/constants";
+import { BUTTONS_CONFIG, CONFIG } from "../common/constants";
 import { HostPermissions, PermissionData } from "../common/types";
 
 // Interface for permission request with resolver
@@ -38,64 +34,67 @@ async function injectModalHtml(
       alignItems: "center",
       justifyContent: "center",
       zIndex: "999999",
-      fontFamily:
-        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+      fontFamily: "Inter, Avenir, Helvetica, Arial, sans-serif",
     },
     container: {
-      background: isDarkTheme ? "#2c2c2e" : "#ffffff",
+      background: isDarkTheme
+        ? `linear-gradient(to bottom, #020917, #101725)`
+        : "linear-gradient(to bottom, #f0f0f0, #e0e0e0);",
       padding: "20px",
       borderRadius: "10px",
       maxWidth: "400px",
       width: "100%",
       boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-      textAlign: "center",
-      color: isDarkTheme ? "#f5f5f7" : "#1d1d1f",
+      color: isDarkTheme ? "#fff" : "#333",
       border: `1px solid ${isDarkTheme ? "#3a3a3c" : "#d2d2d7"}`,
     },
     heading: {
       marginTop: "0",
       fontSize: "16px",
       fontWeight: "600",
-      color: isDarkTheme ? "#f5f5f7" : "#1d1d1f",
     },
     text: {
       margin: "12px 0",
-      color: isDarkTheme ? "#f5f5f7" : "#1d1d1f",
       fontSize: "14px",
     },
     buttonsContainer: {
-      marginTop: "20px",
       display: "flex",
-      justifyContent: "center",
+      flexDirection: "column",
+      gap: "4px",
     },
     button: {
       padding: "4px 12px",
-      borderRadius: "6px",
-      fontSize: "14px",
-      fontWeight: "500",
-      cursor: "pointer",
-      transition: "all 0.15s ease",
+      borderRadius: "4px",
       border: "none",
-      outline: "none",
-    },
-    allowButton: {
-      backgroundColor: isDarkTheme ? "#30d158" : "#34c759",
-      color: "white",
-    },
-    denyButton: {
-      backgroundColor: isDarkTheme ? "#ff453a" : "#ff3b30",
-      color: "white",
-      marginLeft: "10px",
+      cursor: "pointer",
+      fontSize: "12px",
+      transition: "all 0.2s",
+      backgroundColor: "transparent",
+      fontFamily: "Inter, Avenir, Helvetica, Arial, sans-serif",
     },
     permissionItem: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: "8px 12px",
+      padding: "12px",
       borderRadius: "6px",
-      backgroundColor: isDarkTheme
-        ? "rgba(255, 255, 255, 0.05)"
-        : "rgba(0, 0, 0, 0.03)",
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    },
+    allowForTab: {
+      backgroundColor: isDarkTheme ? "#30d158" : "#34c759",
+      color: "white",
+    },
+    allowForSession: {
+      border: isDarkTheme ? "1px solid #5ac8fa" : "1px solid #5ac8fa",
+      color: "#5ac8fa",
+    },
+    allowAlways: {
+      border: isDarkTheme ? "1px solid #007aff" : "1px solid #007aff",
+      color: "#007aff",
+    },
+    deny: {
+      border: isDarkTheme ? "1px solid #ff453a" : "1px solid #ff3b30",
+      color: "#ff3b30",
     },
   };
 
@@ -120,7 +119,7 @@ async function injectModalHtml(
     // Create heading
     const heading = document.createElement("h3");
     Object.assign(heading.style, styles.heading);
-    heading.textContent = "This site is requesting access";
+    heading.textContent = `🔈 ${window.location.hostname} is requesting access to ...`;
     dialogContainer.appendChild(heading);
 
     // Create permissions container
@@ -164,68 +163,34 @@ async function injectModalHtml(
 
   // Create buttons container
   const buttonsContainer = document.createElement("div");
-  Object.assign(buttonsContainer.style, {
-    display: "flex",
-    gap: "8px",
-  });
+  Object.assign(buttonsContainer.style, styles.buttonsContainer);
 
-  // Create allow button
-  const allowButton = document.createElement("button");
-  Object.assign(allowButton.style, { ...styles.button, ...styles.allowButton });
-  allowButton.textContent = "Allow";
-  allowButton.addEventListener("click", () => {
-    // Remove only this permission item
-    permissionItem.remove();
+  // Add buttons
 
-    // Resolve this specific permission request
-    onPermissionChoice({
-      status: PERMISSION_STATUS.ALLOWED,
-      scope: PERMISSION_SCOPES.TAB,
+  Object.entries(BUTTONS_CONFIG).forEach(([scope, buttonConfig]) => {
+    const button = document.createElement("button");
+    Object.assign(button.style, {
+      ...styles.button,
+      ...(styles as any)[scope],
     });
+    button.textContent = buttonConfig.text;
+    button.addEventListener("click", () => {
+      // Remove only this permission item
+      permissionItem.remove();
 
-    // Remove from active requests
-    const index = activePermissionRequests.findIndex(
-      (req) => req.id === requestId
-    );
-    if (index !== -1) {
-      activePermissionRequests.splice(index, 1);
-    }
+      // Resolve this specific permission request
+      onPermissionChoice({
+        status: buttonConfig.status,
+        scope: buttonConfig.scope,
+      });
 
-    // If no more permissions, remove the modal
-    if (permissionsContainer.children.length === 0) {
-      modal.remove();
-    }
-  });
-  buttonsContainer.appendChild(allowButton);
-
-  // Create deny button
-  const denyButton = document.createElement("button");
-  Object.assign(denyButton.style, { ...styles.button, ...styles.denyButton });
-  denyButton.textContent = "Deny";
-  denyButton.addEventListener("click", () => {
-    // Remove only this permission item
-    permissionItem.remove();
-
-    // Resolve this specific permission request
-    onPermissionChoice({
-      status: PERMISSION_STATUS.DENIED,
-      scope: PERMISSION_SCOPES.DOMAIN,
+      // If no more permissions, remove the modal
+      if (permissionsContainer.children.length === 0) {
+        modal.remove();
+      }
     });
-
-    // Remove from active requests
-    const index = activePermissionRequests.findIndex(
-      (req) => req.id === requestId
-    );
-    if (index !== -1) {
-      activePermissionRequests.splice(index, 1);
-    }
-
-    // If no more permissions, remove the modal
-    if (permissionsContainer.children.length === 0) {
-      modal.remove();
-    }
+    buttonsContainer.appendChild(button);
   });
-  buttonsContainer.appendChild(denyButton);
 
   // Assemble the permission item
   permissionItem.appendChild(buttonsContainer);

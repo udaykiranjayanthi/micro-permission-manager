@@ -38,3 +38,45 @@ export const CONFIG = {
     description: "Allow websites to send you notifications",
   },
 };
+
+interface ButtonConfig {
+  text: string;
+  className: string;
+  status: string;
+  scope: string;
+}
+
+interface ButtonsConfig {
+  allowForTab: ButtonConfig;
+  allowForSession: ButtonConfig;
+  allowAlways: ButtonConfig;
+  deny: ButtonConfig;
+}
+
+// Define the button configurations
+export const BUTTONS_CONFIG: ButtonsConfig = {
+  allowForTab: {
+    text: "Allow for this tab",
+    className: "allow-tab",
+    status: PERMISSION_STATUS.ALLOWED,
+    scope: PERMISSION_SCOPES.TAB,
+  },
+  allowForSession: {
+    text: "Allow for this session",
+    className: "allow-session",
+    status: PERMISSION_STATUS.ALLOWED,
+    scope: PERMISSION_SCOPES.SESSION,
+  },
+  allowAlways: {
+    text: "Allow always",
+    className: "allow-always",
+    status: PERMISSION_STATUS.ALLOWED,
+    scope: PERMISSION_SCOPES.DOMAIN,
+  },
+  deny: {
+    text: "Deny",
+    className: "deny",
+    status: PERMISSION_STATUS.DENIED,
+    scope: PERMISSION_SCOPES.DOMAIN,
+  },
+};
