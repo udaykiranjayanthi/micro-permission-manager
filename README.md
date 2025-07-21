@@ -1,36 +1,28 @@
-# Rsbuild project
+# Micro Permission Manager
 
-## Setup
+Micro Permission Manager is a Chrome extension that gives you fine-grained (micro-level) control over the permissions websites request in your browser.
 
-Install the dependencies:
+## What does it do?
+- **Shows you exactly what permissions a website is asking for** (like camera, microphone, location, etc) in a clear, friendly popup.
+- **Lets you allow or deny each permission** for each site, instantly and easily.
+- **Fine-grained control:** When a permission is requested, you can choose to:
+  - Allow just for the current tab
+  - Allow for the current session
+  - Always allow for this site
+  - Deny just this time, or always deny for this site
+- **Remembers your choices** for each site and session, so you don’t get nagged repeatedly.
+- **Gives you a quick overview and control panel** for all permissions requested by the current tab.
+- **Lets you reset all permissions or view your permission history** at any time.
+- **Supports light and dark themes** and lets you enable/disable the extension with a single switch.
 
-```bash
-pnpm install
-```
+## How does it work?
+- When a website tries to access a sensitive permission (like camera or location), the extension intercepts the request and shows a clean, minimal dialog asking for your decision.
+- You can allow or deny the permission just for the current tab, for the session, or permanently for the site.
+- All your choices are stored locally and applied automatically the next time the site asks for the same permission.
+- The extension popup provides a dashboard to see and manage all permissions for the current tab, and to change your theme or disable the extension instantly.
 
-## Get started
+This extension is designed for privacy-conscious users who want to know exactly what sites are accessing and to take control, without being overwhelmed by technical details.
 
-Start the dev server, and the app will be available at [http://localhost:3000](http://localhost:3000).
+---
 
-```bash
-pnpm dev
-```
-
-Build the app for production:
-
-```bash
-pnpm build
-```
-
-Preview the production build locally:
-
-```bash
-pnpm preview
-```
-
-## Learn more
-
-To learn more about Rsbuild, check out the following resources:
-
-- [Rsbuild documentation](https://rsbuild.rs) - explore Rsbuild features and APIs.
-- [Rsbuild GitHub repository](https://github.com/web-infra-dev/rsbuild) - your feedback and contributions are welcome!
+**No data ever leaves your browser.** All settings and permissions are stored locally and never shared.
