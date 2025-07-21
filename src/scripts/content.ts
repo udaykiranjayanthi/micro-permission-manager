@@ -14,7 +14,6 @@ function injectScript(fileName: string) {
 
 // Listen for theme change and notify dialog
 chrome.storage.local.onChanged.addListener((changes) => {
-  console.log("theme changed", changes);
   if (changes.theme?.newValue) {
     const newTheme = changes.theme.newValue;
 

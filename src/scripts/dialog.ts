@@ -53,7 +53,7 @@ async function injectModalHtml(
     container: {
       background: isDarkTheme
         ? `linear-gradient(to bottom, #020917, #101725)`
-        : `linear-gradient(to bottom, #f0f0f0, #e0e0e0)`,
+        : `linear-gradient(to bottom, #ffffff, #e0e0e0)`,
       padding: "20px",
       borderRadius: "10px",
       maxWidth: "400px",
@@ -95,7 +95,7 @@ async function injectModalHtml(
       borderRadius: "6px",
       backgroundColor: isDarkTheme
         ? "rgba(255, 255, 255, 0.1)"
-        : "rgba(255, 255, 255, 0.3)",
+        : "rgba(255, 255, 255, 0.5)",
     },
     allowForTab: {
       backgroundColor: isDarkTheme ? "#30d158" : "#34c759",
