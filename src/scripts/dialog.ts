@@ -11,13 +11,28 @@ interface PermissionRequest {
 
 // Store active permission requests
 const activePermissionRequests: PermissionRequest[] = [];
+let theme = "dark";
+
+window.dispatchEvent(
+  new CustomEvent("FROM_PAGE", {
+    detail: {
+      type: "GET_THEME",
+    },
+  })
+);
+
+window.addEventListener("FROM_EXTENSION", (event: Event) => {
+  const customEvent = event as CustomEvent<{ type: string; value: any }>;
+  if (customEvent.detail.type === "THEME_RESPONSE") {
+    theme = (customEvent.detail.value as string) ?? {};
+  }
+});
 
 async function injectModalHtml(
   permissionType: string,
   onPermissionChoice: (data: PermissionData) => void
 ): Promise<void> {
   // Get theme from storage
-  const theme = "dark";
   const isDarkTheme = theme === "dark";
 
   // Define theme-dependent styles
@@ -38,7 +53,7 @@ async function injectModalHtml(
     container: {
       background: isDarkTheme
         ? `linear-gradient(to bottom, #020917, #101725)`
-        : "linear-gradient(to bottom, #f0f0f0, #e0e0e0);",
+        : `linear-gradient(to bottom, #f0f0f0, #e0e0e0)`,
       padding: "20px",
       borderRadius: "10px",
       maxWidth: "400px",
@@ -78,7 +93,9 @@ async function injectModalHtml(
       alignItems: "center",
       padding: "12px",
       borderRadius: "6px",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      backgroundColor: isDarkTheme
+        ? "rgba(255, 255, 255, 0.1)"
+        : "rgba(255, 255, 255, 0.3)",
     },
     allowForTab: {
       backgroundColor: isDarkTheme ? "#30d158" : "#34c759",

@@ -103,6 +103,11 @@ export const getHostPermissions = async ({
   return output;
 };
 
+export const getTheme = async () => {
+  const result = await chrome.storage.local.get("theme");
+  return result.theme as string;
+};
+
 export const getSessionId = async () => {
   return (await chrome.storage.session.get("sessionId")).sessionId;
 };

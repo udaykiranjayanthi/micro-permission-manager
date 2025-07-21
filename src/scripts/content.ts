@@ -1,4 +1,8 @@
-import { getHostPermissions, updateHostPermissions } from "../common/utils";
+import {
+  getHostPermissions,
+  getTheme,
+  updateHostPermissions,
+} from "../common/utils";
 
 function injectScript(fileName: string) {
   const script = document.createElement("script");
@@ -7,6 +11,23 @@ function injectScript(fileName: string) {
   script.onload = () => script.remove(); // Clean up
   (document.head || document.documentElement).prepend(script);
 }
+
+// Listen for theme change and notify dialog
+chrome.storage.local.onChanged.addListener((changes) => {
+  console.log("theme changed", changes);
+  if (changes.theme?.newValue) {
+    const newTheme = changes.theme.newValue;
+
+    window.dispatchEvent(
+      new CustomEvent("FROM_EXTENSION", {
+        detail: {
+          type: "THEME_RESPONSE",
+          value: newTheme,
+        },
+      })
+    );
+  }
+});
 
 window.addEventListener("FROM_PAGE", (event: Event) => {
   const customEvent = event as CustomEvent<{
@@ -65,6 +86,19 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
       });
     });
   }
+
+  if (type === "GET_THEME") {
+    getTheme().then((hostPermissions) => {
+      window.dispatchEvent(
+        new CustomEvent("FROM_EXTENSION", {
+          detail: {
+            type: "THEME_RESPONSE",
+            value: hostPermissions,
+          },
+        })
+      );
+    });
+  }
 });
 
 window.addEventListener("message", (event) => {
@@ -92,7 +126,7 @@ window.addEventListener("message", (event) => {
   }
 });
 
-chrome.storage.local.get(['enabled'], (result) => {
+chrome.storage.local.get(["enabled"], (result) => {
   const enabled = result.enabled !== false; // default true
   if (enabled) {
     injectScript("./injected.js");
