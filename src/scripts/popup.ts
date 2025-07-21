@@ -10,6 +10,7 @@ import {
   getCurrentTab,
   getHostPermissions,
   getSessionId,
+  resetAllPermissions,
   updateHostPermissions,
 } from "../common/utils";
 
@@ -208,7 +209,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function handleClearAll(): void {
-    console.log("Clear All clicked");
+    resetAllPermissions().then(() => {
+      initApp();
+    });
   }
   // Initialize the application
   initApp();

@@ -103,6 +103,10 @@ export const getHostPermissions = async ({
   return output;
 };
 
+export const resetAllPermissions = async () => {
+  await chrome.storage.local.set({ permissions: {} });
+};
+
 export const getTheme = async () => {
   const result = await chrome.storage.local.get("theme");
   return result.theme as string;
