@@ -5,7 +5,13 @@
   "manifest_version": 3,
   "action": {
     "default_popup": "./static/popup.html",
-    "default_icon": "./static/assets/icon.png"
+    "default_icon": "./static/assets/icon-16.png"
+  },
+  "icons": {
+    "16": "./static/assets/icon-16.png",
+    "32": "./static/assets/icon-32.png",
+    "48": "./static/assets/icon-48.png",
+    "128": "./static/assets/icon-128.png"
   },
   "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": ["<all_urls>"],
