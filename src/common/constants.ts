@@ -80,3 +80,8 @@ export const BUTTONS_CONFIG: ButtonsConfig = {
     scope: PERMISSION_SCOPES.DOMAIN,
   },
 };
+
+export const THEME = {
+  LIGHT: "light",
+  DARK: "dark",
+};

@@ -67,6 +67,7 @@ async function injectModalHtml(
       border: "none",
       cursor: "pointer",
       fontSize: "12px",
+      fontWeight: "500",
       transition: "all 0.2s",
       backgroundColor: "transparent",
       fontFamily: "Inter, Avenir, Helvetica, Arial, sans-serif",

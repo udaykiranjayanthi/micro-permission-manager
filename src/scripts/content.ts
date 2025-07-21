@@ -92,4 +92,9 @@ window.addEventListener("message", (event) => {
   }
 });
 
-injectScript("./injected.js");
+chrome.storage.local.get(['enabled'], (result) => {
+  const enabled = result.enabled !== false; // default true
+  if (enabled) {
+    injectScript("./injected.js");
+  }
+});

@@ -1,6 +1,6 @@
 {
-  "name": "Permission Manager",
-  "description": "Base Level Extension",
+  "name": "Micro Permission Manager",
+  "description": "A simple extension that shows the permissions a website asks for and lets you manage them in granular detail.",
   "version": "1.0",
   "manifest_version": 3,
   "action": {

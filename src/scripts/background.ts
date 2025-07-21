@@ -1,8 +1,10 @@
-import { ExtensionPermissions } from "../common/types";
+import { THEME } from "../common/constants";
 
 chrome.runtime.onInstalled.addListener(() => {
-  const defaultState: { permissions: ExtensionPermissions } = {
+  const defaultState = {
     permissions: {},
+    theme: THEME.DARK,
+    enabled: true,
   };
   chrome.storage.local.set(defaultState);
 });

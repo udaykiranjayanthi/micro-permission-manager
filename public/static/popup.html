@@ -14,19 +14,20 @@
     }
 
     .container {
-      width: 350px;
+      width: 380px;
       padding: 16px;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
       margin-bottom: 16px;
     }
 
     .header h2 {
       margin: 0;
+      margin-bottom: 4px;
     }
 
     .content {
@@ -83,6 +84,7 @@
       border: none;
       cursor: pointer;
       font-size: 12px;
+      font-weight: 500;
       transition: all 0.2s;
       background-color: transparent;
       font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
@@ -161,6 +163,39 @@
       border-radius: 6px;
     }
 
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { display: none; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4caf50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
     /* Theme support */
     html[data-theme="light"] {
       color-scheme: light;
@@ -212,11 +247,30 @@
   <div id="app">
     <div class="container">
       <div class="header">
-        <h2>Permission Manager Extension</h2>
-        <button class="button" id="theme-toggle" style="font-size: 16px;">🌖</button>
+        <h2>Micro Permission Manager</h2>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <!-- Status Switch -->
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <label id="status-label" style="font-size: 12px; margin-bottom: 2px;" for="enable-switch">Enable</label>
+            <label class="switch">
+              <input type="checkbox" id="status-switch">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <!-- Theme Switch -->
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <label id="theme-label" style="font-size: 12px; margin-bottom: 2px;" for="theme-switch">Theme</label>
+            <label class="switch">
+              <input type="checkbox" id="theme-switch">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
       </div>
 
-      <div class="content">
+      <div class="content" id="content">
         <div class="tabInfo">Current Tab: 
           <span class="greenDot"></span>
           <span id="current-tab"></span></div>
@@ -228,7 +282,7 @@
         </div>
       </div>
 
-      <div class="footer">
+      <div class="footer" id="footer">
         <div class="footerItem" id="settings">
           <span class="icon">⚙️</span> Settings
         </div>

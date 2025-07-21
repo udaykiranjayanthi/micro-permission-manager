@@ -3,6 +3,7 @@ import {
   PERMISSION_SCOPES,
   PERMISSION_STATUS,
   BUTTONS_CONFIG,
+  THEME,
 } from "../common/constants";
 import { HostPermissions } from "../common/types";
 import {
@@ -14,14 +15,68 @@ import {
 
 // Main application code
 document.addEventListener("DOMContentLoaded", function () {
-  // ThemeToggle component functionality
-  let currentTheme = localStorage.getItem("theme") || "dark";
-  document.documentElement.setAttribute("data-theme", currentTheme);
+  const statusSwitch = document.getElementById(
+    "status-switch"
+  ) as HTMLInputElement;
+  const statusLabel = document.getElementById("status-label") as HTMLDivElement;
+  const contentDiv = document.getElementById("content") as HTMLDivElement;
+  const footerDiv = document.getElementById("footer") as HTMLDivElement;
 
-  // Get DOM elements
-  const themeToggleBtn = document.getElementById(
-    "theme-toggle"
-  ) as HTMLButtonElement;
+  async function setEnabledStateUI(enabled: boolean) {
+    if (statusSwitch) statusSwitch.checked = enabled;
+    if (statusLabel) {
+      if (enabled) {
+        statusLabel.textContent = "Enabled";
+        if (contentDiv) contentDiv.style.display = "";
+        if (footerDiv) footerDiv.style.display = "";
+      } else {
+        statusLabel.textContent = "Disabled";
+        if (contentDiv) contentDiv.style.display = "none";
+        if (footerDiv) footerDiv.style.display = "none";
+      }
+    }
+  }
+
+  // Check storage on load
+  chrome.storage.local.get(["enabled"], (result) => {
+    const enabled = result.enabled !== false; // default true
+    setEnabledStateUI(enabled);
+  });
+
+  // Switch event
+  if (statusSwitch) {
+    statusSwitch.addEventListener("change", (e) => {
+      const enabled = statusSwitch.checked;
+      chrome.storage.local.set({ enabled });
+      setEnabledStateUI(enabled);
+    });
+  }
+
+  // ThemeToggle component functionality
+  const themeSwitch = document.getElementById(
+    "theme-switch"
+  ) as HTMLInputElement;
+  const themeLabel = document.getElementById("theme-label") as HTMLInputElement;
+  function setTheme(theme: string) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (themeSwitch) themeSwitch.checked = theme === THEME.DARK;
+    if (themeLabel)
+      themeLabel.textContent = theme === THEME.DARK ? "Dark" : "Light";
+  }
+  // On load, get theme from chrome.storage.local
+  chrome.storage.local.get(["theme"], (result) => {
+    const theme = result.theme || THEME.DARK;
+    setTheme(theme);
+  });
+
+  // Theme switch event
+  if (themeSwitch) {
+    themeSwitch.addEventListener("change", () => {
+      const next = themeSwitch.checked ? THEME.DARK : THEME.LIGHT;
+      chrome.storage.local.set({ theme: next }, () => setTheme(next));
+    });
+  }
+
   const currentTabSpan = document.getElementById(
     "current-tab"
   ) as HTMLSpanElement;
@@ -104,11 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
     tabId: string,
     sessionId: string
   ): void {
-    // Theme toggle
-    themeToggleBtn.addEventListener("click", () => {
-      toggleTheme();
-    });
-
     // Footer buttons
     settingsBtn.addEventListener("click", handleSettings);
     viewHistoryBtn.addEventListener("click", handleViewHistory);
@@ -160,14 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleClearAll(): void {
     console.log("Clear All clicked");
   }
-
-  function toggleTheme(): void {
-    currentTheme = currentTheme === "light" ? "dark" : "light";
-    localStorage.setItem("theme", currentTheme);
-    document.documentElement.setAttribute("data-theme", currentTheme);
-    themeToggleBtn.textContent = currentTheme === "light" ? "🌘" : "🌖";
-  }
-
   // Initialize the application
   initApp();
 });
