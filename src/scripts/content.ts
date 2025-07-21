@@ -17,49 +17,75 @@ chrome.storage.local.onChanged.addListener((changes) => {
   if (changes.theme?.newValue) {
     const newTheme = changes.theme.newValue;
 
-    window.dispatchEvent(
-      new CustomEvent("FROM_EXTENSION", {
-        detail: {
-          type: "THEME_RESPONSE",
-          value: newTheme,
-        },
-      })
+    window.postMessage(
+      {
+        type: "THEME_RESPONSE",
+        theme: newTheme,
+      },
+      "*"
     );
   }
 });
 
-window.addEventListener("FROM_PAGE", (event: Event) => {
-  const customEvent = event as CustomEvent<{
-    type: string;
-    hostname: string;
-    tabId: string;
-    sessionId: string;
-    payload: any;
-  }>;
-  const { type, hostname, tabId, sessionId, payload } = customEvent.detail;
+window.addEventListener("message", (event) => {
+  if (event.source !== window) return;
 
-  if (type === "GET_HOST_PERMISSIONS") {
+  const { type, hostname, tabId, sessionId } = event.data;
+
+  if (type === "GET_TAB_ID_FROM_EXTENSION") {
+    chrome.runtime.sendMessage({ type: "GET_CURRENT_TAB_ID" }, (response) => {
+      window.postMessage(
+        { type: "TAB_ID_RESPONSE", tabId: response.tabId },
+        "*"
+      );
+    });
+  }
+
+  if (type === "GET_SESSION_ID_FROM_EXTENSION") {
+    chrome.runtime.sendMessage(
+      { type: "GET_CURRENT_SESSION_ID" },
+      (response) => {
+        window.postMessage(
+          { type: "SESSION_ID_RESPONSE", sessionId: response.sessionId },
+          "*"
+        );
+      }
+    );
+  }
+
+  if (type === "GET_THEME_FROM_EXTENSION") {
+    getTheme().then((theme) => {
+      window.postMessage(
+        {
+          type: "THEME_RESPONSE",
+          theme,
+        },
+        "*"
+      );
+    });
+  }
+
+  if (type === "GET_HOST_PERMISSIONS_FROM_EXTENSION") {
     getHostPermissions({
       hostname,
       tabId,
       sessionId,
     }).then((hostPermissions) => {
-      window.dispatchEvent(
-        new CustomEvent("FROM_EXTENSION", {
-          detail: {
-            type: "HOST_PERMISSIONS_RESPONSE",
-            value: hostPermissions,
-          },
-        })
+      window.postMessage(
+        {
+          type: "HOST_PERMISSIONS_RESPONSE",
+          hostPermissions,
+        },
+        "*"
       );
     });
   }
 
-  if (type === "SET_HOST_PERMISSIONS") {
+  if (type === "SET_HOST_PERMISSIONS_TO_EXTENSION") {
     const {
       service,
       data: { status, scope },
-    } = payload;
+    } = event.data.payload;
 
     updateHostPermissions({
       hostname,
@@ -74,54 +100,15 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
         tabId,
         sessionId,
       }).then((hostPermissions) => {
-        window.dispatchEvent(
-          new CustomEvent("FROM_EXTENSION", {
-            detail: {
-              type: "HOST_PERMISSIONS_RESPONSE",
-              value: hostPermissions,
-            },
-          })
+        window.postMessage(
+          {
+            type: "HOST_PERMISSIONS_RESPONSE",
+            hostPermissions,
+          },
+          "*"
         );
       });
     });
-  }
-
-  if (type === "GET_THEME") {
-    getTheme().then((hostPermissions) => {
-      window.dispatchEvent(
-        new CustomEvent("FROM_EXTENSION", {
-          detail: {
-            type: "THEME_RESPONSE",
-            value: hostPermissions,
-          },
-        })
-      );
-    });
-  }
-});
-
-window.addEventListener("message", (event) => {
-  if (event.source !== window) return;
-
-  if (event.data?.type === "GET_TAB_ID_FROM_EXTENSION") {
-    chrome.runtime.sendMessage({ type: "GET_CURRENT_TAB_ID" }, (response) => {
-      window.postMessage(
-        { type: "TAB_ID_RESPONSE", tabId: response.tabId },
-        "*"
-      );
-    });
-  }
-
-  if (event.data?.type === "GET_SESSION_ID_FROM_EXTENSION") {
-    chrome.runtime.sendMessage(
-      { type: "GET_CURRENT_SESSION_ID" },
-      (response) => {
-        window.postMessage(
-          { type: "SESSION_ID_RESPONSE", sessionId: response.sessionId },
-          "*"
-        );
-      }
-    );
   }
 });
 

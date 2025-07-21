@@ -17,6 +17,9 @@ window.addEventListener("message", (event) => {
   if (event.data?.type === "SESSION_ID_RESPONSE") {
     sessionId = event.data.sessionId;
   }
+  if (event.data?.type === "HOST_PERMISSIONS_RESPONSE") {
+    hostPermissions = (event.data.hostPermissions as HostPermissions) ?? {};
+  }
 
   if (
     (event.data?.type === "TAB_ID_RESPONSE" ||
@@ -24,30 +27,28 @@ window.addEventListener("message", (event) => {
     tabId &&
     sessionId
   ) {
-    window.dispatchEvent(
-      new CustomEvent("FROM_PAGE", {
-        detail: {
-          type: "GET_HOST_PERMISSIONS",
-          hostname,
-          tabId,
-          sessionId,
-        },
-      })
+    window.postMessage(
+      {
+        type: "GET_HOST_PERMISSIONS_FROM_EXTENSION",
+        hostname,
+        tabId,
+        sessionId,
+      },
+      "*"
     );
   }
 });
 
 const setPermission = (service: string, data: PermissionData) => {
-  window.dispatchEvent(
-    new CustomEvent("FROM_PAGE", {
-      detail: {
-        type: "SET_HOST_PERMISSIONS",
-        hostname,
-        tabId,
-        sessionId,
-        payload: { service, data },
-      },
-    })
+  window.postMessage(
+    {
+      type: "SET_HOST_PERMISSIONS_TO_EXTENSION",
+      hostname,
+      tabId,
+      sessionId,
+      payload: { service, data },
+    },
+    "*"
   );
 };
 
@@ -146,14 +147,5 @@ export function overrideGeolocation(): void {
     writable: false,
   });
 }
-
-window.addEventListener("FROM_EXTENSION", (event: Event) => {
-  const customEvent = event as CustomEvent<{ type: string; value: any }>;
-
-  if (customEvent.detail.type === "HOST_PERMISSIONS_RESPONSE") {
-    hostPermissions = (customEvent.detail.value as HostPermissions) ?? {};
-  }
-});
-
 overrideMedia();
 overrideGeolocation();

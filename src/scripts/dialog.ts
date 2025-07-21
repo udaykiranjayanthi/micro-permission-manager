@@ -13,18 +13,11 @@ interface PermissionRequest {
 const activePermissionRequests: PermissionRequest[] = [];
 let theme = "dark";
 
-window.dispatchEvent(
-  new CustomEvent("FROM_PAGE", {
-    detail: {
-      type: "GET_THEME",
-    },
-  })
-);
+window.postMessage({ type: "GET_THEME_FROM_EXTENSION" }, "*");
 
-window.addEventListener("FROM_EXTENSION", (event: Event) => {
-  const customEvent = event as CustomEvent<{ type: string; value: any }>;
-  if (customEvent.detail.type === "THEME_RESPONSE") {
-    theme = (customEvent.detail.value as string) ?? {};
+window.addEventListener("message", (event) => {
+  if (event.data?.type === "THEME_RESPONSE") {
+    theme = (event.data.theme as string) ?? "dark";
   }
 });
 
