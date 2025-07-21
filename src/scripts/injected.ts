@@ -56,9 +56,7 @@ function getHostPermissions(): HostPermissions {
   return hostPermissions;
 }
 
-export function overrideMedia(
-  setPermission: (service: string, data: PermissionData) => void
-): void {
+export function overrideMedia(): void {
   const original = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices
   );
@@ -114,9 +112,7 @@ export function overrideMedia(
   });
 }
 
-export function overrideGeolocation(
-  setPermission: (service: string, data: PermissionData) => void
-): void {
+export function overrideGeolocation(): void {
   const original = navigator.geolocation.getCurrentPosition.bind(
     navigator.geolocation
   );
@@ -159,5 +155,5 @@ window.addEventListener("FROM_EXTENSION", (event: Event) => {
   }
 });
 
-overrideMedia(setPermission);
-overrideGeolocation(setPermission);
+overrideMedia();
+overrideGeolocation();
