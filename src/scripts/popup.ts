@@ -45,14 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const tabId = tab.id?.toString() ?? "";
     const sessionId = await getSessionId();
 
-    console.log(hostname, tabId, sessionId);
-
     currentTabSpan.textContent = hostname;
 
     const hostPermissions =
       (await getHostPermissions({ hostname, tabId, sessionId })) ?? {};
-
-    console.log("hostPermissions", hostPermissions);
 
     renderPermissions(hostPermissions);
     setupEventListeners(hostname, tabId, sessionId);

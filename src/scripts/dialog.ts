@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { BUTTONS_CONFIG, CONFIG } from "../common/constants";
-import { HostPermissions, PermissionData } from "../common/types";
+import { PermissionData } from "../common/types";
 
 // Interface for permission request with resolver
 interface PermissionRequest {
@@ -14,8 +14,7 @@ const activePermissionRequests: PermissionRequest[] = [];
 
 async function injectModalHtml(
   permissionType: string,
-  onPermissionChoice: (data: PermissionData) => void,
-  hostPermissions: HostPermissions
+  onPermissionChoice: (data: PermissionData) => void
 ): Promise<void> {
   // Get theme from storage
   const theme = "dark";
@@ -205,10 +204,9 @@ async function injectModalHtml(
 }
 
 export function showPermissionModal(
-  permissionType: string,
-  hostPermissions: HostPermissions
+  permissionType: string
 ): Promise<PermissionData> {
   return new Promise((resolve) => {
-    injectModalHtml(permissionType, resolve, hostPermissions);
+    injectModalHtml(permissionType, resolve);
   });
 }

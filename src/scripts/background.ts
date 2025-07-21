@@ -18,9 +18,7 @@ function initializeSessionId() {
   chrome.storage.session.get("sessionId", (result) => {
     if (!result.sessionId) {
       const newSessionId = crypto.randomUUID();
-      chrome.storage.session.set({ sessionId: newSessionId }, () => {
-        console.log("Session ID initialized:", newSessionId);
-      });
+      chrome.storage.session.set({ sessionId: newSessionId }, () => {});
     }
   });
 }

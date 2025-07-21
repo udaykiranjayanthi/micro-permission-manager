@@ -5,7 +5,6 @@ function injectScript(fileName: string) {
   script.src = chrome.runtime.getURL(fileName);
   script.type = "module"; // or 'text/javascript'
   script.onload = () => script.remove(); // Clean up
-  console.log(chrome.runtime.getURL(fileName), script);
   (document.head || document.documentElement).prepend(script);
 }
 
@@ -18,15 +17,6 @@ window.addEventListener("FROM_PAGE", (event: Event) => {
     payload: any;
   }>;
   const { type, hostname, tabId, sessionId, payload } = customEvent.detail;
-
-  console.log(
-    "CONTENT SCRIPT listener",
-    type,
-    hostname,
-    tabId,
-    sessionId,
-    payload
-  );
 
   if (type === "GET_HOST_PERMISSIONS") {
     getHostPermissions({

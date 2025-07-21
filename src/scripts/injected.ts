@@ -7,19 +7,15 @@ let sessionId = "";
 let tabId = "";
 let hostPermissions: HostPermissions = {};
 
-console.log("injected", hostname, tabId, sessionId);
-
 window.postMessage({ type: "GET_TAB_ID_FROM_EXTENSION" }, "*");
 window.postMessage({ type: "GET_SESSION_ID_FROM_EXTENSION" }, "*");
 
 window.addEventListener("message", (event) => {
   if (event.data?.type === "TAB_ID_RESPONSE") {
     tabId = event.data.tabId;
-    console.log("Tab ID from extension:", tabId);
   }
   if (event.data?.type === "SESSION_ID_RESPONSE") {
     sessionId = event.data.sessionId;
-    console.log("Session ID from extension:", sessionId);
   }
 
   if (
@@ -28,7 +24,6 @@ window.addEventListener("message", (event) => {
     tabId &&
     sessionId
   ) {
-    console.log("dispatched event", tabId, sessionId);
     window.dispatchEvent(
       new CustomEvent("FROM_PAGE", {
         detail: {
@@ -43,7 +38,6 @@ window.addEventListener("message", (event) => {
 });
 
 const setPermission = (service: string, data: PermissionData) => {
-  console.log("setting permission", service, data, hostname, tabId, sessionId);
   window.dispatchEvent(
     new CustomEvent("FROM_PAGE", {
       detail: {
@@ -79,17 +73,12 @@ export function overrideMedia(
       // video
       const videoConstraints = args[0]?.video;
 
-      console.log("interceptor, host permissions", currentPermissions);
-
       if (
         audioConstraints &&
         currentPermissions[PERMISSION_NAMES.MICROPHONE]?.status !==
           PERMISSION_STATUS.ALLOWED
       ) {
-        const response = await showPermissionModal(
-          PERMISSION_NAMES.MICROPHONE,
-          currentPermissions
-        );
+        const response = await showPermissionModal(PERMISSION_NAMES.MICROPHONE);
 
         setPermission(PERMISSION_NAMES.MICROPHONE, {
           status: response.status,
@@ -106,10 +95,7 @@ export function overrideMedia(
         currentPermissions[PERMISSION_NAMES.CAMERA]?.status !==
           PERMISSION_STATUS.ALLOWED
       ) {
-        const response = await showPermissionModal(
-          PERMISSION_NAMES.CAMERA,
-          currentPermissions
-        );
+        const response = await showPermissionModal(PERMISSION_NAMES.CAMERA);
 
         setPermission(PERMISSION_NAMES.CAMERA, {
           status: response.status,
@@ -140,20 +126,13 @@ export function overrideGeolocation(
       // Get the latest hostPermissions at call time
       const currentPermissions = getHostPermissions();
 
-      console.log(
-        "geolocation interceptor, host permissions",
-        currentPermissions
-      );
       if (
         currentPermissions[PERMISSION_NAMES.GEOLOCATION]?.status !==
         PERMISSION_STATUS.ALLOWED
       ) {
         const response = await showPermissionModal(
-          PERMISSION_NAMES.GEOLOCATION,
-          currentPermissions
+          PERMISSION_NAMES.GEOLOCATION
         );
-
-        console.log("calling set permission", response);
 
         setPermission(PERMISSION_NAMES.GEOLOCATION, {
           status: response.status,

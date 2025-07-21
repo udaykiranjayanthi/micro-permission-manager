@@ -22,15 +22,6 @@ export const updateHostPermissions = async ({
   scope,
   status,
 }: UpdateHostPermissionsParams) => {
-  console.log(
-    "update host permissions",
-    hostname,
-    sessionId,
-    tabId,
-    service,
-    scope,
-    status
-  );
   const result = await chrome.storage.local.get("permissions");
   const permissions = result.permissions as ExtensionPermissions;
 
