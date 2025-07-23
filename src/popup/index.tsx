@@ -37,7 +37,16 @@ const PermissionItem: React.FC<PermissionItemProps> = ({
         {CONFIG[name].emoji} {CONFIG[name].name}
       </span>
       <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-        {status === PERMISSION_STATUS.ALLOWED ? `Allowed (${scope})` : "Denied"}
+        {status === PERMISSION_STATUS.DENIED && "Denied (will ask again)"}
+        {status === PERMISSION_STATUS.ALLOWED &&
+          scope === PERMISSION_SCOPES.DOMAIN &&
+          "Always allowed for this site"}
+        {status === PERMISSION_STATUS.ALLOWED &&
+          scope === PERMISSION_SCOPES.SESSION &&
+          "Allowed for this browser session only"}
+        {status === PERMISSION_STATUS.ALLOWED &&
+          scope === PERMISSION_SCOPES.TAB &&
+          "Allowed for this tab only"}
       </span>
     </div>
     <div className={styles.buttonsContainer}>
