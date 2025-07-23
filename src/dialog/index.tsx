@@ -4,6 +4,7 @@ import { BUTTONS_CONFIG, CONFIG } from "../common/constants";
 import { PermissionData } from "../common/types";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./dialog.module.scss";
+import Button from "../common/components/Button/Button";
 
 interface PermissionRequest {
   id: string;
@@ -57,9 +58,12 @@ function PermissionItem({
       </div>
       <div className={styles.buttonsContainer}>
         {Object.entries(BUTTONS_CONFIG).map(([key, button]) => (
-          <button
+          <Button
             key={key}
-            className={`${styles.button} ${styles[button.className]}`}
+            variant={button.variant}
+            color={button.color}
+            size="small"
+            fullWidth
             onClick={() =>
               onPermissionChoice({
                 service: permissionType,
@@ -69,7 +73,7 @@ function PermissionItem({
             }
           >
             {button.text}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -129,7 +133,7 @@ function Dialog({ onClose }: DialogProps) {
 
   return (
     <div
-      className={`${styles.modal} ${styles.modal} ${
+      className={`${styles.modal} ${
         theme === "dark" ? styles.themeDark : styles.themeLight
       }`}
     >

@@ -16,6 +16,7 @@ import {
   updateHostPermissions,
 } from "../common/utils";
 import styles from "./popup.module.scss";
+import Button from "../common/components/Button/Button";
 
 interface PermissionItemProps {
   name: string;
@@ -199,11 +200,11 @@ function Popup() {
                     <div className={styles.buttonsContainer}>
                       {Object.entries(BUTTONS_CONFIG).map(
                         ([action, config]) => (
-                          <button
+                          <Button
                             key={action}
-                            className={`${styles.button} ${
-                              styles[config.className]
-                            }`}
+                            variant={config.variant}
+                            color={config.color}
+                            size="small"
                             onClick={() =>
                               handlePermissionClick(
                                 name,
@@ -213,7 +214,7 @@ function Popup() {
                             }
                           >
                             {config.text}
-                          </button>
+                          </Button>
                         )
                       )}
                     </div>
@@ -228,15 +229,27 @@ function Popup() {
           </div>
 
           <div className={styles.footer}>
-            <div className={styles.footerItem} onClick={handleSettings}>
+            <Button
+              variant="text"
+              onClick={handleSettings}
+              className={styles.footerItem}
+            >
               Settings
-            </div>
-            <div className={styles.footerItem} onClick={handleViewHistory}>
+            </Button>
+            <Button
+              variant="text"
+              onClick={handleViewHistory}
+              className={styles.footerItem}
+            >
               View History
-            </div>
-            <div className={styles.footerItem} onClick={handleClearAll}>
+            </Button>
+            <Button
+              variant="text"
+              onClick={handleClearAll}
+              className={styles.footerItem}
+            >
               Clear All
-            </div>
+            </Button>
           </div>
         </>
       )}

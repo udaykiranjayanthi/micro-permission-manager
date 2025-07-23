@@ -1,0 +1,80 @@
+@import "../../variables.scss";
+
+.button {
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  background-color: transparent;
+  font-family: $font-family;
+  text-align: center;
+  border-radius: 4px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &.small {
+    padding: 6px 12px;
+    font-size: $font-size-xs;
+  }
+
+  &.medium {
+    padding: 8px 16px;
+    font-size: $font-size-sm;
+  }
+
+  &.fullWidth {
+    width: 100%;
+  }
+
+  // Color variants
+  &.default {
+    --button-color: #666;
+    --button-hover-bg: rgba(102, 102, 102, 0.1);
+  }
+
+  &.success {
+    --button-color: #{$color-success};
+    --button-hover-bg: rgba(52, 199, 89, 0.1);
+  }
+
+  &.error {
+    --button-color: #{$color-danger};
+    --button-hover-bg: rgba(255, 59, 48, 0.1);
+  }
+
+  &.info {
+    --button-color: #{$color-info};
+    --button-hover-bg: rgba(0, 122, 255, 0.1);
+  }
+
+  // Filled Variant
+  &.filled {
+    border: none;
+    background-color: var(--button-color);
+    color: white;
+  }
+
+  // Outlined Variant
+  &.outlined {
+    background-color: transparent;
+    border: 1px solid var(--button-color);
+    color: var(--button-color);
+
+    &:hover {
+      background-color: var(--button-hover-bg);
+    }
+  }
+
+  // Text Variant
+  &.text {
+    background-color: transparent;
+    border: none;
+    color: var(--button-color);
+
+    &:hover {
+      background-color: var(--button-hover-bg);
+    }
+  }
+}

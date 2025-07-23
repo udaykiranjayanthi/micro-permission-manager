@@ -41,7 +41,8 @@ export const CONFIG = {
 
 interface ButtonConfig {
   text: string;
-  className: string;
+  variant: string;
+  color: string;
   status: string;
   scope: string;
 }
@@ -57,25 +58,29 @@ interface ButtonsConfig {
 export const BUTTONS_CONFIG: ButtonsConfig = {
   allowForTab: {
     text: "Allow for this tab",
-    className: "allowTab",
+    variant: "filled",
+    color: "success",
     status: PERMISSION_STATUS.ALLOWED,
     scope: PERMISSION_SCOPES.TAB,
   },
   allowForSession: {
     text: "Allow for this session",
-    className: "allowSession",
+    variant: "outlined",
+    color: "success",
     status: PERMISSION_STATUS.ALLOWED,
     scope: PERMISSION_SCOPES.SESSION,
   },
   allowAlways: {
     text: "Allow always",
-    className: "allowAlways",
+    variant: "outlined",
+    color: "success",
     status: PERMISSION_STATUS.ALLOWED,
     scope: PERMISSION_SCOPES.DOMAIN,
   },
   deny: {
     text: "Deny",
-    className: "deny",
+    variant: "filled",
+    color: "error",
     status: PERMISSION_STATUS.DENIED,
     scope: PERMISSION_SCOPES.DOMAIN,
   },
