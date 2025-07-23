@@ -124,10 +124,7 @@ window.addEventListener("message", (event) => {
 chrome.storage.local.get(["enabled"], (result) => {
   const enabled = result.enabled !== false; // default true
   if (enabled) {
-    console.log("Injecting script");
     injectScript("./injected.js");
     injectCss("./static/css/injected.css");
   }
 });
-
-console.log("Running content script");

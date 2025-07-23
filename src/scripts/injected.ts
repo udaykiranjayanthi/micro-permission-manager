@@ -1,9 +1,6 @@
 import { HostPermissions, PermissionData } from "../common/types";
 import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
-import { showPermissionModal } from "./dialog";
-import { showModal } from "../dialog";
-
-console.log("injected script is running");
+import { showPermissionModal } from "../dialog";
 
 const hostname = window.location.hostname;
 let sessionId = "";
@@ -152,5 +149,3 @@ export function overrideGeolocation(): void {
 }
 overrideMedia();
 overrideGeolocation();
-
-showModal(PERMISSION_NAMES.GEOLOCATION);

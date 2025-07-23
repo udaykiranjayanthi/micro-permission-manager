@@ -2,96 +2,183 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BUTTONS_CONFIG, CONFIG } from "../common/constants";
 import { PermissionData } from "../common/types";
+import { v4 as uuidv4 } from "uuid";
 import "./dialog.scss";
 
-interface DialogProps {
-  permissionType: string;
-  onClose: (data: PermissionData & { service: string }) => void;
+interface PermissionRequest {
+  id: string;
+  type: string;
+  resolver: (data: PermissionData & { service: string }) => void;
 }
 
-function Dialog({ permissionType, onClose }: DialogProps) {
+interface DialogProps {
+  onClose?: () => void;
+}
+
+interface PermissionItemProps {
+  permissionType: string;
+  onPermissionChoice: (data: PermissionData & { service: string }) => void;
+}
+
+// Store active permission requests
+const activePermissionRequests: PermissionRequest[] = [];
+
+function PermissionItem({
+  permissionType,
+  onPermissionChoice,
+}: PermissionItemProps) {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
     // Request theme from extension
     window.postMessage({ type: "GET_THEME_FROM_EXTENSION" }, "*");
 
-    // Listen for theme response
-    const handleTheme = (event: MessageEvent) => {
+    const handleThemeResponse = (event: MessageEvent) => {
       if (event.data?.type === "THEME_RESPONSE") {
-        setTheme(event.data.theme ?? "dark");
+        setTheme(event.data.theme === "light" ? "light" : "dark");
       }
     };
 
-    window.addEventListener("message", handleTheme);
-    return () => window.removeEventListener("message", handleTheme);
+    window.addEventListener("message", handleThemeResponse);
+    return () => window.removeEventListener("message", handleThemeResponse);
   }, []);
 
-  const handlePermissionClick = (status: string, scope: string) => {
-    onClose({
-      status,
-      scope,
-      service: permissionType,
-    });
+  return (
+    <div className="permission-item" data-theme={theme}>
+      <div>
+        <span role="img" aria-label="emoji">
+          {CONFIG[permissionType]?.emoji}
+        </span>{" "}
+        {CONFIG[permissionType]?.name}
+      </div>
+      <div className="buttons-container">
+        {Object.entries(BUTTONS_CONFIG).map(([key, button]) => (
+          <button
+            key={key}
+            className={`button ${button.className}`}
+            onClick={() =>
+              onPermissionChoice({
+                service: permissionType,
+                status: button.status,
+                scope: button.scope,
+              })
+            }
+          >
+            {button.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Dialog({ onClose }: DialogProps) {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [permissionRequests, setPermissionRequests] = useState<
+    PermissionRequest[]
+  >([]);
+
+  // Keep local state in sync with global requests
+  useEffect(() => {
+    setPermissionRequests([...activePermissionRequests]);
+  }, [activePermissionRequests]);
+
+  useEffect(() => {
+    // Request theme from extension
+    window.postMessage({ type: "GET_THEME_FROM_EXTENSION" }, "*");
+
+    const handleThemeResponse = (event: MessageEvent) => {
+      if (event.data?.type === "THEME_RESPONSE") {
+        setTheme(event.data.theme === "light" ? "light" : "dark");
+      }
+    };
+
+    window.addEventListener("message", handleThemeResponse);
+    return () => window.removeEventListener("message", handleThemeResponse);
+  }, []);
+
+  const handlePermissionChoice = (
+    requestId: string,
+    data: PermissionData & { service: string }
+  ) => {
+    // Find and resolve the permission request
+    const request = activePermissionRequests.find(
+      (req) => req.id === requestId
+    );
+    if (request) {
+      request.resolver(data);
+      // Remove the resolved request
+      const index = activePermissionRequests.findIndex(
+        (req) => req.id === requestId
+      );
+      if (index !== -1) {
+        activePermissionRequests.splice(index, 1);
+        setPermissionRequests([...activePermissionRequests]);
+      }
+    }
+
+    // If no more requests, close the modal
+    if (activePermissionRequests.length === 0 && onClose) {
+      onClose();
+    }
   };
 
   return (
     <div id="__permission_manager_modal__" data-theme={theme}>
       <div className="container">
         <h2 className="heading">
-          {CONFIG[permissionType].emoji} Permission Request
+          {window.location.hostname} is requesting permission for{" "}
         </h2>
-        <p className="text">
-          {CONFIG[permissionType].name} is requesting permission to access this
-          website.
-        </p>
-
-        <div className="permission-item" data-theme={theme}>
-          <span>{CONFIG[permissionType].name}</span>
-        </div>
-
-        <div className="buttons-container">
-          {Object.entries(BUTTONS_CONFIG).map(([action, config]) => (
-            <button
-              key={action}
-              className={`button ${config.className}`}
-              onClick={() => handlePermissionClick(config.status, config.scope)}
-            >
-              {config.text}
-            </button>
-          ))}
-        </div>
+        {permissionRequests.map((request) => (
+          <PermissionItem
+            key={request.id}
+            permissionType={request.type}
+            onPermissionChoice={(data) =>
+              handlePermissionChoice(request.id, data)
+            }
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-export function showModal(
+let modalRoot: ReactDOM.Root | null = null;
+let modalContainer: HTMLElement | null = null;
+
+export function showPermissionModal(
   permissionType: string
 ): Promise<PermissionData & { service: string }> {
   return new Promise((resolve) => {
-    console.log("trigger show modal");
-    // Prevent duplicates
-    if (document.getElementById("__permission_manager_modal__")) {
-      resolve({ status: "DENIED", scope: "tab", service: permissionType });
-      return;
+    const requestId = uuidv4();
+    activePermissionRequests.push({
+      id: requestId,
+      type: permissionType,
+      resolver: resolve,
+    });
+
+    // If root doesn't exist, create it
+    if (!document.getElementById("__react-modal-root__")) {
+      modalContainer = document.createElement("div");
+      modalContainer.id = "__react-modal-root__";
+      document.body.appendChild(modalContainer);
+
+      modalRoot = ReactDOM.createRoot(modalContainer);
+      modalRoot.render(
+        <Dialog
+          onClose={() => {
+            // Clean up
+            if (modalRoot) {
+              modalRoot.unmount();
+              modalRoot = null;
+            }
+            if (modalContainer) {
+              modalContainer.remove();
+              modalContainer = null;
+            }
+          }}
+        />
+      );
     }
-
-    const container = document.createElement("div");
-    container.id = "__react-modal-root__";
-    document.body.appendChild(container);
-
-    const root = ReactDOM.createRoot(container);
-    root.render(
-      <Dialog
-        permissionType={permissionType}
-        onClose={(data) => {
-          // Clean up
-          root.unmount();
-          container.remove();
-          resolve(data);
-        }}
-      />
-    );
   });
 }
