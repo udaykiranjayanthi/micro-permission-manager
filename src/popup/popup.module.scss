@@ -1,8 +1,35 @@
+@import "../common/variables.scss";
+
+// Light theme styles
+html {
+  --color-text: #{$color-dark-text};
+  --color-text-secondary: #{$color-dark-text-secondary};
+  --color-bg: #{$color-dark-bg-primary};
+  --color-bg-secondary: #{$color-dark-bg-secondary};
+  --color-border: #{$color-dark-border};
+  --color-success-text: #{$color-dark-success-text};
+  --color-danger-text: #{$color-dark-danger-text};
+
+  &[data-theme="light"] {
+    --color-text: #{$color-light-text};
+    --color-text-secondary: #{$color-light-text-secondary};
+    --color-bg: #{$color-light-bg-primary};
+    --color-bg-secondary: #{$color-light-bg-secondary};
+    --color-border: #{$color-light-border};
+    --color-success-text: #{$color-light-success-text};
+    --color-danger-text: #{$color-light-danger-text};
+  }
+}
+
 body {
   margin: 0;
-  color: #fff;
+  color: var(--color-text);
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  background-image: linear-gradient(to bottom, #020917, #101725);
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-bg),
+    var(--color-bg-secondary)
+  );
 }
 
 .switchGroup {
@@ -22,7 +49,7 @@ body {
     display: none;
 
     &:checked + .slider {
-      background-color: #4caf50;
+      background-color: $color-success;
     }
 
     &:checked + .slider:before {
@@ -37,7 +64,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: $color-gray;
     transition: 0.4s;
     border-radius: 24px;
 
@@ -78,8 +105,8 @@ body {
 }
 
 .content {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -97,7 +124,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .permissionName {
@@ -116,13 +143,13 @@ body {
   border-radius: 4px;
 
   &.allowed {
-    background-color: rgba(0, 255, 0, 0.2);
-    color: #8eff8e;
+    background-color: $color-success-bg;
+    color: var(--color-success-text);
   }
 
   &.denied {
-    background-color: rgba(255, 0, 0, 0.2);
-    color: #ff8e8e;
+    background-color: $color-danger-bg;
+    color: var(--color-danger-text);
   }
 }
 
@@ -132,7 +159,7 @@ body {
   gap: 8px;
   padding: 8px 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--color-border);
 
   &:last-child {
     border-bottom: none;
@@ -150,25 +177,7 @@ body {
   text-align: center;
   opacity: 0.7;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-bg-secondary);
   padding: 16px;
   border-radius: 8px;
-}
-
-// Light theme styles
-html[data-theme="light"] {
-  body {
-    background-image: none;
-    background-color: #fff;
-    color: #000;
-  }
-
-  .content {
-    border-color: rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .permissionItem {
-    border-bottom-color: rgba(0, 0, 0, 0.1);
-  }
 }

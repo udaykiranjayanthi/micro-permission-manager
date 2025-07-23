@@ -1,25 +1,31 @@
 // Colors
+$color-dark-text: #fff;
+$color-dark-text-secondary: #ddd;
 $color-dark-bg-primary: #020917;
 $color-dark-bg-secondary: #101725;
 $color-dark-border: #3a3a3c;
-$color-dark-text: #fff;
 
+$color-light-text: #222;
+$color-light-text-secondary: #444;
 $color-light-bg-primary: #ffffff;
 $color-light-bg-secondary: #e0e0e0;
 $color-light-border: #d2d2d7;
-$color-light-text: #333;
 
 // Button Colors
 $color-success: #34c759;
 $color-info: #007aff;
 $color-purple: #5856d6;
 $color-danger: #ff3b30;
+$color-gray: #808080;
+$color-button-text: white;
 
 // Status Colors
 $color-success-bg: rgba(0, 255, 0, 0.2);
-$color-success-text: #8eff8e;
+$color-dark-success-text: #8eff8e;
+$color-light-success-text: #126312;
 $color-danger-bg: rgba(255, 0, 0, 0.2);
-$color-danger-text: #ff8e8e;
+$color-dark-danger-text: #ff8e8e;
+$color-light-danger-text: #7a1818;
 
 // Overlays
 $color-overlay-dark: rgba(0, 0, 0, 0.5);

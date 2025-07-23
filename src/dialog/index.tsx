@@ -45,11 +45,7 @@ function PermissionItem({
   }, []);
 
   return (
-    <div
-      className={`${styles.permissionItem} ${
-        theme === "dark" ? styles.themeDark : styles.themeLight
-      }`}
-    >
+    <div className={styles.permissionItem}>
       <div>
         <span role="img" aria-label="emoji">
           {CONFIG[permissionType]?.emoji}
@@ -132,11 +128,7 @@ function Dialog({ onClose }: DialogProps) {
   };
 
   return (
-    <div
-      className={`${styles.modal} ${
-        theme === "dark" ? styles.themeDark : styles.themeLight
-      }`}
-    >
+    <div className={styles.modal} data-theme={theme}>
       <div className={styles.container}>
         <h2 className={styles.heading}>
           {window.location.hostname} is requesting permission for{" "}
