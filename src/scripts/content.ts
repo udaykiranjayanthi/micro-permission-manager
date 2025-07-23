@@ -12,6 +12,15 @@ function injectScript(fileName: string) {
   (document.head || document.documentElement).prepend(script);
 }
 
+function injectCss(fileName: string) {
+  const style = document.createElement("link");
+  style.id = "__permission_manager_styles__";
+  style.rel = "stylesheet";
+  style.type = "text/css";
+  style.href = chrome.runtime.getURL(fileName);
+  document.head.appendChild(style);
+}
+
 // Listen for theme change and notify dialog
 chrome.storage.local.onChanged.addListener((changes) => {
   if (changes.theme?.newValue) {
@@ -117,6 +126,7 @@ chrome.storage.local.get(["enabled"], (result) => {
   if (enabled) {
     console.log("Injecting script");
     injectScript("./injected.js");
+    injectCss("./static/css/injected.css");
   }
 });
 

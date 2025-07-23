@@ -24,7 +24,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["injected.js", "static/assets/*"],
+      "resources": ["injected.js", "static/*"],
       "matches": ["<all_urls>"]
     }
   ],

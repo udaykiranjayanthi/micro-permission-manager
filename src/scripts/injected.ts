@@ -153,4 +153,4 @@ export function overrideGeolocation(): void {
 overrideMedia();
 overrideGeolocation();
 
-showModal();
+showModal(PERMISSION_NAMES.GEOLOCATION);

@@ -3,6 +3,9 @@ import { pluginSass } from "@rsbuild/plugin-sass";
 import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
+  output: {
+    filenameHash: false,
+  },
   source: {
     entry: {
       background: {
@@ -20,11 +23,6 @@ export default defineConfig({
         html: false,
         filename: "injected.js",
       },
-      // popup: {
-      //   import: "./src/scripts/popup.ts",
-      //   html: false,
-      //   filename: "popup.js",
-      // },
       popup: {
         import: "./src/popup/index.tsx",
         html: true,
