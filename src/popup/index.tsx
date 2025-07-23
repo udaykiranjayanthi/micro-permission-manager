@@ -1,9 +1,245 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import {
+  CONFIG,
+  PERMISSION_SCOPES,
+  PERMISSION_STATUS,
+  BUTTONS_CONFIG,
+  THEME,
+} from "../common/constants";
+import { HostPermissions } from "../common/types";
+import {
+  getCurrentTab,
+  getHostPermissions,
+  getSessionId,
+  resetAllPermissions,
+  updateHostPermissions,
+} from "../common/utils";
+import "./popup.scss";
+
+interface PermissionItemProps {
+  name: string;
+  status: string;
+  scope: string;
+}
+
+const PermissionItem: React.FC<PermissionItemProps> = ({
+  name,
+  status,
+  scope,
+}) => (
+  <div className="permissionItem">
+    <div className="permissionName">
+      <span>
+        {CONFIG[name].emoji} {CONFIG[name].name}
+      </span>
+      <span className={`status ${status.toLowerCase()}`}>
+        {status === PERMISSION_STATUS.ALLOWED ? `Allowed (${scope})` : "Denied"}
+      </span>
+    </div>
+  </div>
+);
 
 function Popup() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+  const [enabled, setEnabled] = useState(true);
+  const [theme, setTheme] = useState(THEME.DARK);
+  const [currentTab, setCurrentTab] = useState<string>("");
+  const [permissions, setPermissions] = useState<HostPermissions>({});
+  const [tabId, setTabId] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>("");
+  const [hostname, setHostname] = useState<string>("");
+
+  useEffect(() => {
+    // Initialize app
+    const init = async () => {
+      // Get enabled state
+      chrome.storage.local.get(["enabled"], (result) => {
+        setEnabled(result.enabled !== false);
+      });
+
+      // Get theme
+      chrome.storage.local.get(["theme"], (result) => {
+        const currentTheme = result.theme || THEME.DARK;
+        setTheme(currentTheme);
+        document.documentElement.setAttribute("data-theme", currentTheme);
+      });
+
+      // Get current tab and permissions
+      const tab = await getCurrentTab();
+      if (!tab?.url) return;
+
+      const url = new URL(tab.url);
+      const currentHostname = url.hostname;
+      setHostname(currentHostname);
+      setCurrentTab(currentHostname);
+
+      const currentTabId = await getCurrentTab().then(
+        (tab) => tab?.id?.toString() || ""
+      );
+      setTabId(currentTabId);
+
+      const currentSessionId = await getSessionId();
+      setSessionId(currentSessionId);
+
+      const hostPermissions = await getHostPermissions({
+        hostname: currentHostname,
+        tabId: currentTabId,
+        sessionId: currentSessionId,
+      });
+      if (hostPermissions) setPermissions(hostPermissions);
+    };
+
+    init();
+  }, []);
+
+  const handleEnabledChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEnabled = e.target.checked;
+    chrome.storage.local.set({ enabled: newEnabled });
+    setEnabled(newEnabled);
+  };
+
+  const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTheme = e.target.checked ? THEME.DARK : THEME.LIGHT;
+    chrome.storage.local.set({ theme: newTheme });
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+  };
+
+  const handlePermissionClick = async (
+    service: string,
+    status: string,
+    scope: string
+  ) => {
+    await updateHostPermissions({
+      hostname,
+      tabId,
+      sessionId,
+      service,
+      status,
+      scope,
+    });
+    const updatedPermissions = await getHostPermissions({
+      hostname,
+      tabId,
+      sessionId,
+    });
+    if (updatedPermissions) setPermissions(updatedPermissions);
+  };
+
+  const handleSettings = () => {
+    chrome.runtime.openOptionsPage();
+  };
+
+  const handleViewHistory = () => {
+    chrome.tabs.create({ url: "history.html" });
+  };
+
+  const handleClearAll = async () => {
+    await resetAllPermissions();
+    const updatedPermissions = await getHostPermissions({
+      hostname,
+      tabId,
+      sessionId,
+    });
+    if (updatedPermissions) setPermissions(updatedPermissions);
+  };
+
+  return (
+    <div className="container">
+      <div className="header">
+        <h2>Permission Manager</h2>
+        <div className="switches">
+          <div className="switchGroup">
+            <label htmlFor="status-switch">
+              {enabled ? "Enabled" : "Disabled"}
+            </label>
+            <label className="switch">
+              <input
+                type="checkbox"
+                id="status-switch"
+                checked={enabled}
+                onChange={handleEnabledChange}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
+          <div className="switchGroup">
+            <label htmlFor="theme-switch">
+              {theme === THEME.DARK ? "Dark" : "Light"}
+            </label>
+            <label className="switch">
+              <input
+                type="checkbox"
+                id="theme-switch"
+                checked={theme === THEME.DARK}
+                onChange={handleThemeChange}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {enabled && (
+        <>
+          <div className="content">
+            <div className="tabInfo">
+              Current tab: <span id="current-tab">{currentTab}</span>
+            </div>
+            <div id="permissions-container">
+              {Object.entries(permissions).length > 0 ? (
+                Object.entries(permissions).map(([name, { status, scope }]) => (
+                  <div key={name}>
+                    <PermissionItem
+                      key={name}
+                      name={name}
+                      status={status}
+                      scope={scope}
+                    />
+                    <div className="buttons-container">
+                      {Object.entries(BUTTONS_CONFIG).map(
+                        ([action, config]) => (
+                          <button
+                            key={action}
+                            className={`button ${config.className}`}
+                            onClick={() =>
+                              handlePermissionClick(
+                                name,
+                                config.status,
+                                config.scope
+                              )
+                            }
+                          >
+                            {config.text}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="noPermissions">
+                  No permissions requested yet
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="footer">
+            <div className="footerItem" onClick={handleSettings}>
+              Settings
+            </div>
+            <div className="footerItem" onClick={handleViewHistory}>
+              View History
+            </div>
+            <div className="footerItem" onClick={handleClearAll}>
+              Clear All
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 const rootEl = document.getElementById("root");

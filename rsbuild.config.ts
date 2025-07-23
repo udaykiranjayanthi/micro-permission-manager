@@ -20,13 +20,14 @@ export default defineConfig({
         html: false,
         filename: "injected.js",
       },
+      // popup: {
+      //   import: "./src/scripts/popup.ts",
+      //   html: false,
+      //   filename: "popup.js",
+      // },
       popup: {
-        import: "./src/scripts/popup.ts",
-        html: false,
-        filename: "popup.js",
-      },
-      popupTsx: {
         import: "./src/popup/index.tsx",
+        html: true,
       },
     },
   },
