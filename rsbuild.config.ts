@@ -1,4 +1,6 @@
 import { defineConfig } from "@rsbuild/core";
+import { pluginSass } from "@rsbuild/plugin-sass";
+import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
   source: {
@@ -22,6 +24,17 @@ export default defineConfig({
         import: "./src/scripts/popup.ts",
         html: false,
         filename: "popup.js",
+      },
+      popupTsx: {
+        import: "./src/popup/index.tsx",
+      },
+    },
+  },
+  plugins: [pluginSass(), pluginReact()],
+  tools: {
+    rspack: {
+      optimization: {
+        splitChunks: false,
       },
     },
   },

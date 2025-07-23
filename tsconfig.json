@@ -8,7 +8,9 @@
     "rootDir": "./src",
     "moduleResolution": "node",
     "allowJs": true,
-    "lib": ["DOM", "ES2017"]
+    "lib": ["DOM", "ES2017"],
+    "jsx": "react-jsx",
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]

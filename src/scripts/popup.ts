@@ -13,6 +13,7 @@ import {
   resetAllPermissions,
   updateHostPermissions,
 } from "../common/utils";
+import "../common/styles.scss";
 
 // Main application code
 document.addEventListener("DOMContentLoaded", function () {
