@@ -1,0 +1,204 @@
+@import "../common/variables.scss";
+
+// Light theme styles
+html {
+  --color-text: #{$color-dark-text};
+  --color-text-secondary: #{$color-dark-text-secondary};
+  --color-bg: #{$color-dark-bg-primary};
+  --color-bg-secondary: #{$color-dark-bg-secondary};
+  --color-border: #{$color-dark-border};
+  --color-success-text: #{$color-dark-success-text};
+  --color-danger-text: #{$color-dark-danger-text};
+
+  &[data-theme="light"] {
+    --color-text: #{$color-light-text};
+    --color-text-secondary: #{$color-light-text-secondary};
+    --color-bg: #{$color-light-bg-primary};
+    --color-bg-secondary: #{$color-light-bg-secondary};
+    --color-border: #{$color-light-border};
+    --color-success-text: #{$color-light-success-text};
+    --color-danger-text: #{$color-light-danger-text};
+  }
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-bg),
+    var(--color-bg-secondary)
+  );
+}
+
+.switchGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+
+  input {
+    display: none;
+
+    &:checked + .slider {
+      background-color: $color-success;
+    }
+
+    &:checked + .slider:before {
+      transform: translateX(20px);
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $color-gray;
+    transition: 0.4s;
+    border-radius: 24px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+  }
+}
+
+.container {
+  min-width: 460px;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+  }
+
+  .switches {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.content {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.tabInfo {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 20px;
+
+  .hostname {
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: $color-success;
+      margin-right: 4px;
+    }
+  }
+}
+
+.permissionItem {
+  border-bottom: 1px solid var(--color-border);
+  margin-top: 12px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.permissionName {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.status {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+
+  &.allowed {
+    background-color: $color-success-bg;
+    color: var(--color-success-text);
+  }
+
+  &.denied {
+    background-color: $color-danger-bg;
+    color: var(--color-danger-text);
+  }
+}
+
+.buttonsContainer {
+  display: flex;
+  justify-content: stretch;
+  gap: 8px;
+  padding-top: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    padding-bottom: 12px;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: stretch;
+  gap: 8px;
+
+  button {
+    flex: 1;
+  }
+}
+
+.noPermissions {
+  text-align: center;
+  opacity: 0.7;
+  font-size: 14px;
+  background-color: var(--color-bg-secondary);
+  padding: 16px;
+  border-radius: 8px;
+}

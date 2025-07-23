@@ -27,6 +27,10 @@ export default defineConfig({
         import: "./src/popup/index.tsx",
         html: true,
       },
+      options: {
+        import: "./src/options/index.tsx",
+        html: true,
+      },
     },
   },
   plugins: [pluginSass(), pluginReact()],
