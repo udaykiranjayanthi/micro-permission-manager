@@ -22,12 +22,14 @@ interface PermissionItemProps {
   name: string;
   status: string;
   scope: string;
+  handlePermissionClick: (name: string, status: string, scope: string) => void;
 }
 
 const PermissionItem: React.FC<PermissionItemProps> = ({
   name,
   status,
   scope,
+  handlePermissionClick,
 }) => (
   <div className={styles.permissionItem}>
     <div className={styles.permissionName}>
@@ -37,6 +39,22 @@ const PermissionItem: React.FC<PermissionItemProps> = ({
       <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
         {status === PERMISSION_STATUS.ALLOWED ? `Allowed (${scope})` : "Denied"}
       </span>
+    </div>
+    <div className={styles.buttonsContainer}>
+      {Object.entries(BUTTONS_CONFIG).map(([action, config]) => (
+        <Button
+          key={action}
+          variant={config.variant}
+          color={config.color}
+          fullWidth
+          size="small"
+          onClick={() =>
+            handlePermissionClick(name, config.status, config.scope)
+          }
+        >
+          {config.text}
+        </Button>
+      ))}
     </div>
   </div>
 );
@@ -185,40 +203,18 @@ function Popup() {
         <>
           <div className={styles.content}>
             <div className={styles.tabInfo}>
-              Current tab: <span id="current-tab">{currentTab}</span>
+              Current tab: <span className={styles.hostname}>{currentTab}</span>
             </div>
             <div id="permissions-container">
               {Object.entries(permissions).length > 0 ? (
                 Object.entries(permissions).map(([name, { status, scope }]) => (
-                  <div key={name}>
-                    <PermissionItem
-                      key={name}
-                      name={name}
-                      status={status}
-                      scope={scope}
-                    />
-                    <div className={styles.buttonsContainer}>
-                      {Object.entries(BUTTONS_CONFIG).map(
-                        ([action, config]) => (
-                          <Button
-                            key={action}
-                            variant={config.variant}
-                            color={config.color}
-                            size="small"
-                            onClick={() =>
-                              handlePermissionClick(
-                                name,
-                                config.status,
-                                config.scope
-                              )
-                            }
-                          >
-                            {config.text}
-                          </Button>
-                        )
-                      )}
-                    </div>
-                  </div>
+                  <PermissionItem
+                    key={name}
+                    name={name}
+                    status={status}
+                    scope={scope}
+                    handlePermissionClick={handlePermissionClick}
+                  />
                 ))
               ) : (
                 <div className={styles.noPermissions}>

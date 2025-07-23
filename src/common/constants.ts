@@ -57,21 +57,21 @@ interface ButtonsConfig {
 // Define the button configurations
 export const BUTTONS_CONFIG: ButtonsConfig = {
   allowForTab: {
-    text: "Allow for this tab",
+    text: "This tab",
     variant: "filled",
     color: "success",
     status: PERMISSION_STATUS.ALLOWED,
     scope: PERMISSION_SCOPES.TAB,
   },
   allowForSession: {
-    text: "Allow for this session",
+    text: "This session",
     variant: "outlined",
     color: "success",
     status: PERMISSION_STATUS.ALLOWED,
     scope: PERMISSION_SCOPES.SESSION,
   },
   allowAlways: {
-    text: "Allow always",
+    text: "Always",
     variant: "outlined",
     color: "success",
     status: PERMISSION_STATUS.ALLOWED,

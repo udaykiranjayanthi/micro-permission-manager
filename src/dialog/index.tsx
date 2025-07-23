@@ -46,7 +46,7 @@ function PermissionItem({
 
   return (
     <div className={styles.permissionItem}>
-      <div>
+      <div className={styles.permissionName}>
         <span role="img" aria-label="emoji">
           {CONFIG[permissionType]?.emoji}
         </span>{" "}
@@ -130,9 +130,10 @@ function Dialog({ onClose }: DialogProps) {
   return (
     <div className={styles.modal} data-theme={theme}>
       <div className={styles.container}>
-        <h2 className={styles.heading}>
-          {window.location.hostname} is requesting permission for{" "}
-        </h2>
+        <p className={styles.heading}>
+          <span className={styles.hostname}>{window.location.hostname}</span> is
+          requesting permission for{" "}
+        </p>
         {permissionRequests.map((request) => (
           <PermissionItem
             key={request.id}

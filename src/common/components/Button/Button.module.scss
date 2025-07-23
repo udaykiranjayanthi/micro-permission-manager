@@ -21,7 +21,7 @@
 
   &.medium {
     padding: 8px 16px;
-    font-size: $font-size-sm;
+    font-size: $font-size-xs;
   }
 
   &.fullWidth {
@@ -30,7 +30,7 @@
 
   // Color variants
   &.default {
-    --button-color: #666;
+    --button-color: var(--color-text-secondary);
     --button-hover-bg: rgba(102, 102, 102, 0.1);
   }
 

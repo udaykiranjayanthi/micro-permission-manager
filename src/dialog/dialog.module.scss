@@ -30,7 +30,7 @@
   .container {
     padding: 20px;
     border-radius: 10px;
-    max-width: 400px;
+    max-width: 440px;
     width: 100%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     margin: 16px;
@@ -49,7 +49,22 @@
   .heading {
     margin-top: 0;
     font-size: 16px;
-    font-weight: 600;
+
+    .hostname {
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+
+      &::before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: $color-success;
+        margin-right: 8px;
+      }
+    }
   }
 
   .text {
@@ -58,19 +73,20 @@
   }
 
   .permissionItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 12px;
     border-radius: 6px;
     margin-bottom: 16px;
-
     background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .permissionName {
+    margin-top: 4px;
+    margin-bottom: 12px;
   }
 
   .buttonsContainer {
     display: flex;
-    flex-direction: column;
     gap: 8px;
   }
 }
