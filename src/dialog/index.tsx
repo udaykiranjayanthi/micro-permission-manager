@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BUTTONS_CONFIG, CONFIG } from "../common/constants";
 import { PermissionData } from "../common/types";
 import { v4 as uuidv4 } from "uuid";
-import "./dialog.scss";
+import styles from "./dialog.module.scss";
 
 interface PermissionRequest {
   id: string;
@@ -44,18 +44,22 @@ function PermissionItem({
   }, []);
 
   return (
-    <div className="permission-item" data-theme={theme}>
+    <div
+      className={`${styles.permissionItem} ${
+        theme === "dark" ? styles.themeDark : styles.themeLight
+      }`}
+    >
       <div>
         <span role="img" aria-label="emoji">
           {CONFIG[permissionType]?.emoji}
         </span>{" "}
         {CONFIG[permissionType]?.name}
       </div>
-      <div className="buttons-container">
+      <div className={styles.buttonsContainer}>
         {Object.entries(BUTTONS_CONFIG).map(([key, button]) => (
           <button
             key={key}
-            className={`button ${button.className}`}
+            className={`${styles.button} ${styles[button.className]}`}
             onClick={() =>
               onPermissionChoice({
                 service: permissionType,
@@ -124,9 +128,13 @@ function Dialog({ onClose }: DialogProps) {
   };
 
   return (
-    <div id="__permission_manager_modal__" data-theme={theme}>
-      <div className="container">
-        <h2 className="heading">
+    <div
+      className={`${styles.modal} ${styles.modal} ${
+        theme === "dark" ? styles.themeDark : styles.themeLight
+      }`}
+    >
+      <div className={styles.container}>
+        <h2 className={styles.heading}>
           {window.location.hostname} is requesting permission for{" "}
         </h2>
         {permissionRequests.map((request) => (

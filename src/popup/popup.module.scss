@@ -126,7 +126,7 @@ body {
   }
 }
 
-.buttons-container {
+.buttonsContainer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -158,17 +158,17 @@ body {
     opacity: 0.9;
   }
 
-  &.allow-tab {
+  &.allowTab {
     background-color: #34c759;
     color: white;
   }
 
-  &.allow-session {
+  &.allowSession {
     background-color: #5856d6;
     color: white;
   }
 
-  &.allow-always {
+  &.allowAlways {
     background-color: #007aff;
     color: white;
   }

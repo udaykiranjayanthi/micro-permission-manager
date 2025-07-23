@@ -15,7 +15,7 @@ import {
   resetAllPermissions,
   updateHostPermissions,
 } from "../common/utils";
-import "./popup.scss";
+import styles from "./popup.module.scss";
 
 interface PermissionItemProps {
   name: string;
@@ -28,12 +28,12 @@ const PermissionItem: React.FC<PermissionItemProps> = ({
   status,
   scope,
 }) => (
-  <div className="permissionItem">
-    <div className="permissionName">
+  <div className={styles.permissionItem}>
+    <div className={styles.permissionName}>
       <span>
         {CONFIG[name].emoji} {CONFIG[name].name}
       </span>
-      <span className={`status ${status.toLowerCase()}`}>
+      <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
         {status === PERMISSION_STATUS.ALLOWED ? `Allowed (${scope})` : "Denied"}
       </span>
     </div>
@@ -145,36 +145,36 @@ function Popup() {
   };
 
   return (
-    <div className="container">
-      <div className="header">
+    <div className={styles.container}>
+      <div className={styles.header}>
         <h2>Permission Manager</h2>
-        <div className="switches">
-          <div className="switchGroup">
+        <div className={styles.switches}>
+          <div className={styles.switchGroup}>
             <label htmlFor="status-switch">
               {enabled ? "Enabled" : "Disabled"}
             </label>
-            <label className="switch">
+            <label className={styles.switch}>
               <input
                 type="checkbox"
                 id="status-switch"
                 checked={enabled}
                 onChange={handleEnabledChange}
               />
-              <span className="slider"></span>
+              <span className={styles.slider}></span>
             </label>
           </div>
-          <div className="switchGroup">
+          <div className={styles.switchGroup}>
             <label htmlFor="theme-switch">
               {theme === THEME.DARK ? "Dark" : "Light"}
             </label>
-            <label className="switch">
+            <label className={styles.switch}>
               <input
                 type="checkbox"
                 id="theme-switch"
                 checked={theme === THEME.DARK}
                 onChange={handleThemeChange}
               />
-              <span className="slider"></span>
+              <span className={styles.slider}></span>
             </label>
           </div>
         </div>
@@ -182,8 +182,8 @@ function Popup() {
 
       {enabled && (
         <>
-          <div className="content">
-            <div className="tabInfo">
+          <div className={styles.content}>
+            <div className={styles.tabInfo}>
               Current tab: <span id="current-tab">{currentTab}</span>
             </div>
             <div id="permissions-container">
@@ -196,12 +196,14 @@ function Popup() {
                       status={status}
                       scope={scope}
                     />
-                    <div className="buttons-container">
+                    <div className={styles.buttonsContainer}>
                       {Object.entries(BUTTONS_CONFIG).map(
                         ([action, config]) => (
                           <button
                             key={action}
-                            className={`button ${config.className}`}
+                            className={`${styles.button} ${
+                              styles[config.className]
+                            }`}
                             onClick={() =>
                               handlePermissionClick(
                                 name,
@@ -218,21 +220,21 @@ function Popup() {
                   </div>
                 ))
               ) : (
-                <div className="noPermissions">
+                <div className={styles.noPermissions}>
                   No permissions requested yet
                 </div>
               )}
             </div>
           </div>
 
-          <div className="footer">
-            <div className="footerItem" onClick={handleSettings}>
+          <div className={styles.footer}>
+            <div className={styles.footerItem} onClick={handleSettings}>
               Settings
             </div>
-            <div className="footerItem" onClick={handleViewHistory}>
+            <div className={styles.footerItem} onClick={handleViewHistory}>
               View History
             </div>
-            <div className="footerItem" onClick={handleClearAll}>
+            <div className={styles.footerItem} onClick={handleClearAll}>
               Clear All
             </div>
           </div>

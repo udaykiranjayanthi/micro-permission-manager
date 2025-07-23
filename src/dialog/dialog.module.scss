@@ -1,4 +1,4 @@
-#__permission_manager_modal__ {
+.modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -20,7 +20,7 @@
     margin: 16px;
   }
 
-  &[data-theme="dark"] {
+  &.themeDark {
     .container {
       background: linear-gradient(to bottom, #020917, #101725);
       color: #fff;
@@ -28,7 +28,7 @@
     }
   }
 
-  &[data-theme="light"] {
+  &.themeLight {
     .container {
       background: linear-gradient(to bottom, #ffffff, #e0e0e0);
       color: #333;
@@ -47,7 +47,7 @@
     font-size: 14px;
   }
 
-  .permission-item {
+  .permissionItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -55,16 +55,16 @@
     border-radius: 6px;
     margin-bottom: 16px;
 
-    &[data-theme="dark"] {
+    &.themeDark {
       background-color: rgba(255, 255, 255, 0.1);
     }
 
-    &[data-theme="light"] {
+    &.themeLight {
       background-color: rgba(255, 255, 255, 0.5);
     }
   }
 
-  .buttons-container {
+  .buttonsContainer {
     display: flex;
     flex-direction: column;
     gap: 8px;
