@@ -127,8 +127,8 @@ body {
 }
 
 .buttonsContainer {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   padding: 8px 0;
   margin-bottom: 16px;
@@ -140,71 +140,19 @@ body {
   }
 }
 
-.button {
-  padding: 6px 12px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.2s;
-  background-color: transparent;
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  flex: 1;
-  min-width: 120px;
-  text-align: center;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &.allowTab {
-    background-color: #34c759;
-    color: white;
-  }
-
-  &.allowSession {
-    background-color: #5856d6;
-    color: white;
-  }
-
-  &.allowAlways {
-    background-color: #007aff;
-    color: white;
-  }
-
-  &.deny {
-    background-color: #ff3b30;
-    color: white;
-  }
-}
-
 .footer {
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
 
-.footerItem {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-}
-
 .noPermissions {
   text-align: center;
   opacity: 0.7;
   font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 8px;
 }
 
 // Light theme styles
@@ -222,9 +170,5 @@ html[data-theme="light"] {
 
   .permissionItem {
     border-bottom-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .footerItem:hover {
-    background-color: rgba(0, 0, 0, 0.05);
   }
 }

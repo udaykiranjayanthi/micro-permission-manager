@@ -229,25 +229,13 @@ function Popup() {
           </div>
 
           <div className={styles.footer}>
-            <Button
-              variant="text"
-              onClick={handleSettings}
-              className={styles.footerItem}
-            >
+            <Button variant="text" onClick={handleSettings}>
               Settings
             </Button>
-            <Button
-              variant="text"
-              onClick={handleViewHistory}
-              className={styles.footerItem}
-            >
+            <Button variant="text" onClick={handleViewHistory}>
               View History
             </Button>
-            <Button
-              variant="text"
-              onClick={handleClearAll}
-              className={styles.footerItem}
-            >
+            <Button variant="text" onClick={handleClearAll}>
               Clear All
             </Button>
           </div>
