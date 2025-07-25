@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import { Switch } from "../common/components/Switch/Switch";
 import {
   CONFIG,
   PERMISSION_SCOPES,
@@ -177,34 +178,18 @@ function Popup() {
       <div className={styles.header}>
         <h2>Permission Manager</h2>
         <div className={styles.switches}>
-          <div className={styles.switchGroup}>
-            <label htmlFor="status-switch">
-              {enabled ? "Enabled" : "Disabled"}
-            </label>
-            <label className={styles.switch}>
-              <input
-                type="checkbox"
-                id="status-switch"
-                checked={enabled}
-                onChange={handleEnabledChange}
-              />
-              <span className={styles.slider}></span>
-            </label>
-          </div>
-          <div className={styles.switchGroup}>
-            <label htmlFor="theme-switch">
-              {theme === THEME.DARK ? "Dark" : "Light"}
-            </label>
-            <label className={styles.switch}>
-              <input
-                type="checkbox"
-                id="theme-switch"
-                checked={theme === THEME.DARK}
-                onChange={handleThemeChange}
-              />
-              <span className={styles.slider}></span>
-            </label>
-          </div>
+          <Switch
+            id="status-switch"
+            checked={enabled}
+            onChange={handleEnabledChange}
+            label={enabled ? "Enabled" : "Disabled"}
+          />
+          <Switch
+            id="theme-switch"
+            checked={theme === THEME.DARK}
+            onChange={handleThemeChange}
+            label={theme === THEME.DARK ? "Dark" : "Light"}
+          />
         </div>
       </div>
 
