@@ -1,20 +1,26 @@
 import { THEME } from "../common/constants";
+import { LocalState } from "../common/types";
 
 chrome.runtime.onInstalled.addListener(() => {
-  const defaultState = {
-    permissions: {},
-    theme: THEME.DARK,
+  const defaultState: LocalState = {
     enabled: true,
+    theme: THEME.DARK,
+    permissions: {},
+    locationSettings: {
+      fakeLocation: false,
+    },
+    videoSettings: {
+      fakeVideo: false,
+    },
   };
   chrome.storage.local.set(defaultState);
+
+  initializeSessionId();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   initializeSessionId();
 });
-
-// Also run on initial install or load
-initializeSessionId();
 
 function initializeSessionId() {
   chrome.storage.session.get("sessionId", (result) => {

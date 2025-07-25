@@ -11,10 +11,14 @@ import {
 import { HostPermissions } from "../common/types";
 import {
   getCurrentTab,
+  getEnabled,
   getHostPermissions,
   getSessionId,
+  getTheme,
   resetAllPermissions,
+  updateEnabled,
   updateHostPermissions,
+  updateTheme,
 } from "../common/utils";
 import styles from "./popup.module.scss";
 import Button from "../common/components/Button/Button";
@@ -82,13 +86,11 @@ function Popup() {
     // Initialize app
     const init = async () => {
       // Get enabled state
-      chrome.storage.local.get(["enabled"], (result) => {
-        setEnabled(result.enabled !== false);
-      });
+      getEnabled().then((enabled) => setEnabled(enabled));
 
       // Get theme
-      chrome.storage.local.get(["theme"], (result) => {
-        const currentTheme = result.theme || THEME.DARK;
+      getTheme().then((theme) => {
+        const currentTheme = theme || THEME.DARK;
         setTheme(currentTheme);
         document.documentElement.setAttribute("data-theme", currentTheme);
       });
@@ -121,15 +123,17 @@ function Popup() {
     init();
   }, []);
 
-  const handleEnabledChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEnabledChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newEnabled = e.target.checked;
-    chrome.storage.local.set({ enabled: newEnabled });
+    await updateEnabled(newEnabled);
     setEnabled(newEnabled);
   };
 
-  const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThemeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTheme = e.target.checked ? THEME.DARK : THEME.LIGHT;
-    chrome.storage.local.set({ theme: newTheme });
+    await updateTheme(newTheme);
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
   };

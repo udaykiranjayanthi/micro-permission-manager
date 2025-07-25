@@ -1,258 +1,338 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import { THEME } from "../common/constants";
+import { Switch } from "../common/components/Switch/Switch";
 import {
-  CONFIG,
-  PERMISSION_SCOPES,
-  PERMISSION_STATUS,
-  BUTTONS_CONFIG,
-  THEME,
-} from "../common/constants";
-import { HostPermissions } from "../common/types";
-import {
-  getCurrentTab,
-  getHostPermissions,
-  getSessionId,
-  resetAllPermissions,
-  updateHostPermissions,
+  getEnabled,
+  getTheme,
+  getLocationSettings,
+  getVideoSettings,
+  updateEnabled,
+  updateTheme,
+  updateLocationSettings,
+  updateVideoSettings,
 } from "../common/utils";
 import styles from "./options.module.scss";
-import Button from "../common/components/Button/Button";
+import { LocationSettings, VideoSettings } from "../common/types";
 
-interface PermissionItemProps {
-  name: string;
-  status: string;
-  scope: string;
-  handlePermissionClick: (name: string, status: string, scope: string) => void;
-}
-
-const PermissionItem: React.FC<PermissionItemProps> = ({
-  name,
-  status,
-  scope,
-  handlePermissionClick,
-}) => (
-  <div className={styles.permissionItem}>
-    <div className={styles.permissionName}>
-      <span>
-        {CONFIG[name].emoji} {CONFIG[name].name}
-      </span>
-      <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-        {status === PERMISSION_STATUS.DENIED && "Denied (will ask again)"}
-        {status === PERMISSION_STATUS.ALLOWED &&
-          scope === PERMISSION_SCOPES.DOMAIN &&
-          "Always allowed for this site"}
-        {status === PERMISSION_STATUS.ALLOWED &&
-          scope === PERMISSION_SCOPES.SESSION &&
-          "Allowed for this browser session only"}
-        {status === PERMISSION_STATUS.ALLOWED &&
-          scope === PERMISSION_SCOPES.TAB &&
-          "Allowed for this tab only"}
-      </span>
-    </div>
-    <div className={styles.buttonsContainer}>
-      {Object.entries(BUTTONS_CONFIG).map(([action, config]) => (
-        <Button
-          key={action}
-          variant={config.variant}
-          color={config.color}
-          fullWidth
-          size="small"
-          onClick={() =>
-            handlePermissionClick(name, config.status, config.scope)
-          }
-        >
-          {config.text}
-        </Button>
-      ))}
-    </div>
-  </div>
-);
-
-function Options() {
-  const [enabled, setEnabled] = useState(true);
-  const [theme, setTheme] = useState(THEME.DARK);
-  const [currentTab, setCurrentTab] = useState<string>("");
-  const [permissions, setPermissions] = useState<HostPermissions>({});
-  const [tabId, setTabId] = useState<string>("");
-  const [sessionId, setSessionId] = useState<string>("");
-  const [hostname, setHostname] = useState<string>("");
+const Options: React.FC = () => {
+  const [enabled, setEnabled] = useState<boolean>(true);
+  const [theme, setTheme] = useState<string>(THEME.DARK);
+  const [locationSettings, setLocationSettings] = useState<LocationSettings>({
+    fakeLocation: false,
+  });
+  const [videoSettings, setVideoSettings] = useState<VideoSettings>({
+    fakeVideo: false,
+  });
 
   useEffect(() => {
-    // Initialize app
     const init = async () => {
       // Get enabled state
-      chrome.storage.local.get(["enabled"], (result) => {
-        setEnabled(result.enabled !== false);
-      });
+      getEnabled().then((enabled) => setEnabled(enabled));
 
       // Get theme
-      chrome.storage.local.get(["theme"], (result) => {
-        const currentTheme = result.theme || THEME.DARK;
-        setTheme(currentTheme);
-        document.documentElement.setAttribute("data-theme", currentTheme);
+      getTheme().then((theme) => {
+        setTheme(theme);
+        document.documentElement.setAttribute("data-theme", theme);
       });
 
-      // Get current tab and permissions
-      const tab = await getCurrentTab();
-      if (!tab?.url) return;
-
-      const url = new URL(tab.url);
-      const currentHostname = url.hostname;
-      setHostname(currentHostname);
-      setCurrentTab(currentHostname);
-
-      const currentTabId = await getCurrentTab().then(
-        (tab) => tab?.id?.toString() || ""
+      // Get location settings
+      getLocationSettings().then((locationSettings) =>
+        setLocationSettings(locationSettings)
       );
-      setTabId(currentTabId);
 
-      const currentSessionId = await getSessionId();
-      setSessionId(currentSessionId);
-
-      const hostPermissions = await getHostPermissions({
-        hostname: currentHostname,
-        tabId: currentTabId,
-        sessionId: currentSessionId,
-      });
-      if (hostPermissions) setPermissions(hostPermissions);
+      // Get video settings
+      getVideoSettings().then((videoSettings) =>
+        setVideoSettings(videoSettings)
+      );
     };
 
     init();
   }, []);
 
-  const handleEnabledChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEnabled = e.target.checked;
-    chrome.storage.local.set({ enabled: newEnabled });
-    setEnabled(newEnabled);
+  const handleEnabledChange = async (enabled: boolean) => {
+    await updateEnabled(enabled);
+    setEnabled(enabled);
   };
 
-  const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTheme = e.target.checked ? THEME.DARK : THEME.LIGHT;
-    chrome.storage.local.set({ theme: newTheme });
-    setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+  const handleThemeChange = async (theme: string) => {
+    await updateTheme(theme);
+    setTheme(theme);
+    document.documentElement.setAttribute("data-theme", theme);
   };
 
-  const handlePermissionClick = async (
-    service: string,
-    status: string,
-    scope: string
+  const handleLocationSettingsChange = async (
+    locationSettings: LocationSettings
   ) => {
-    await updateHostPermissions({
-      hostname,
-      tabId,
-      sessionId,
-      service,
-      status,
-      scope,
-    });
-    const updatedPermissions = await getHostPermissions({
-      hostname,
-      tabId,
-      sessionId,
-    });
-    if (updatedPermissions) setPermissions(updatedPermissions);
+    await updateLocationSettings(locationSettings);
+    setLocationSettings(locationSettings);
   };
 
-  const handleSettings = () => {
-    chrome.runtime.openOptionsPage();
-  };
-
-  const handleViewHistory = () => {
-    chrome.tabs.create({ url: "history.html" });
-  };
-
-  const handleClearAll = async () => {
-    await resetAllPermissions();
-    const updatedPermissions = await getHostPermissions({
-      hostname,
-      tabId,
-      sessionId,
-    });
-    if (updatedPermissions) setPermissions(updatedPermissions);
+  const handleVideoSettingsChange = async (videoSettings: VideoSettings) => {
+    await updateVideoSettings(videoSettings);
+    setVideoSettings(videoSettings);
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Permission Manager</h2>
-        <div className={styles.switches}>
-          <div className={styles.switchGroup}>
-            <label htmlFor="status-switch">
-              {enabled ? "Enabled" : "Disabled"}
-            </label>
-            <label className={styles.switch}>
-              <input
-                type="checkbox"
-                id="status-switch"
+        <img src="/static/assets/icon-128.png" alt="Extension icon" />
+        <div className={styles.headerText}>
+          <h1>Permission Manager</h1>
+          <p>
+            Control and customize your browser permissions with enhanced privacy
+            features.
+          </p>
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <h2>General Settings</h2>
+        <div className={styles.setting}>
+          <div className={styles.settingHead}>
+            <div className={styles.settingInfo}>
+              <h3>Extension Status</h3>
+              <p>Enable or disable all permission management features</p>
+            </div>
+            <div className={styles.settingControl}>
+              <Switch
+                id="extension-status"
                 checked={enabled}
-                onChange={handleEnabledChange}
+                onChange={(e) => handleEnabledChange(e.target.checked)}
+                label={enabled ? "Enabled" : "Disabled"}
               />
-              <span className={styles.slider}></span>
-            </label>
+            </div>
           </div>
-          <div className={styles.switchGroup}>
-            <label htmlFor="theme-switch">
-              {theme === THEME.DARK ? "Dark" : "Light"}
-            </label>
-            <label className={styles.switch}>
-              <input
-                type="checkbox"
+        </div>
+
+        <div className={styles.setting}>
+          <div className={styles.settingHead}>
+            <div className={styles.settingInfo}>
+              <h3>Theme</h3>
+              <p>Choose between light and dark theme</p>
+            </div>
+            <div className={styles.settingControl}>
+              <Switch
                 id="theme-switch"
                 checked={theme === THEME.DARK}
-                onChange={handleThemeChange}
+                onChange={(e) =>
+                  handleThemeChange(e.target.checked ? THEME.DARK : THEME.LIGHT)
+                }
+                label={theme === THEME.DARK ? "Dark" : "Light"}
               />
-              <span className={styles.slider}></span>
-            </label>
+            </div>
           </div>
         </div>
       </div>
 
-      {enabled && (
-        <>
-          <div className={styles.content}>
-            <div className={styles.tabInfo}>
-              Current tab: <span className={styles.hostname}>{currentTab}</span>
+      <div className={styles.section}>
+        <h2>Location Settings</h2>
+        <div className={styles.setting}>
+          <div className={styles.settingHead}>
+            <div className={styles.settingInfo}>
+              <h3>Fake Location</h3>
+              <p>
+                Spoof your location when websites request geolocation access
+              </p>
             </div>
-            <div id="permissions-container">
-              {Object.entries(permissions).length > 0 ? (
-                Object.entries(permissions).map(([name, { status, scope }]) => (
-                  <PermissionItem
-                    key={name}
-                    name={name}
-                    status={status}
-                    scope={scope}
-                    handlePermissionClick={handlePermissionClick}
+            <div className={styles.settingControl}>
+              <Switch
+                id="fake-location"
+                checked={locationSettings.fakeLocation}
+                onChange={(e) =>
+                  handleLocationSettingsChange({
+                    ...locationSettings,
+                    fakeLocation: e.target.checked,
+                  })
+                }
+                label={locationSettings.fakeLocation ? "Enabled" : "Disabled"}
+              />
+            </div>
+          </div>
+
+          {locationSettings.fakeLocation && (
+            <div className={styles.configContainer}>
+              <div className={styles.radioGroup}>
+                <label>
+                  <input
+                    type="radio"
+                    checked={locationSettings?.config?.type === "random"}
+                    onChange={() =>
+                      handleLocationSettingsChange({
+                        ...locationSettings,
+                        config: { type: "random" },
+                      })
+                    }
                   />
-                ))
-              ) : (
-                <div className={styles.noPermissions}>
-                  No permissions requested yet
+                  Random Location
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    checked={locationSettings?.config?.type === "static"}
+                    onChange={() =>
+                      handleLocationSettingsChange({
+                        ...locationSettings,
+                        config: { type: "static", latitude: 0, longitude: 0 },
+                      })
+                    }
+                  />
+                  Static Location
+                </label>
+              </div>
+              {locationSettings?.config?.type === "static" && (
+                <div className={styles.coordinates}>
+                  <div className={styles.inputGroup}>
+                    <label>Latitude</label>
+                    <input
+                      type="number"
+                      value={locationSettings?.config?.latitude}
+                      onChange={(e) =>
+                        handleLocationSettingsChange({
+                          ...locationSettings,
+                          config: {
+                            ...locationSettings.config!,
+                            latitude: parseFloat(e.target.value),
+                          },
+                        })
+                      }
+                      min="-90"
+                      max="90"
+                      step="0.000001"
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Longitude</label>
+                    <input
+                      type="number"
+                      value={locationSettings?.config?.longitude}
+                      onChange={(e) =>
+                        handleLocationSettingsChange({
+                          ...locationSettings,
+                          config: {
+                            ...locationSettings.config!,
+                            longitude: parseFloat(e.target.value),
+                          },
+                        })
+                      }
+                      min="-180"
+                      max="180"
+                      step="0.000001"
+                    />
+                  </div>
                 </div>
               )}
             </div>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <h2>Video Settings</h2>
+        <div className={styles.setting}>
+          <div className={styles.settingHead}>
+            <div className={styles.settingInfo}>
+              <h3>Fake Video Stream</h3>
+              <p>
+                Use a custom video stream when websites request camera access
+              </p>
+            </div>
+            <div className={styles.settingControl}>
+              <Switch
+                id="fake-video"
+                checked={videoSettings.fakeVideo}
+                onChange={(e) =>
+                  handleVideoSettingsChange({
+                    ...videoSettings,
+                    fakeVideo: e.target.checked,
+                  })
+                }
+                label={videoSettings.fakeVideo ? "Enabled" : "Disabled"}
+              />
+            </div>
           </div>
 
-          <div className={styles.footer}>
-            <Button variant="text" onClick={handleSettings}>
-              Settings
-            </Button>
-            <Button variant="text" onClick={handleViewHistory}>
-              View History
-            </Button>
-            <Button variant="text" onClick={handleClearAll}>
-              Clear All
-            </Button>
-          </div>
-        </>
-      )}
+          {videoSettings.fakeVideo && (
+            <div className={styles.configContainer}>
+              <div className={styles.radioGroup}>
+                <label>
+                  <input
+                    type="radio"
+                    checked={videoSettings?.config?.type === "text"}
+                    onChange={() =>
+                      handleVideoSettingsChange({
+                        ...videoSettings,
+                        config: {
+                          type: "text",
+                          text: "",
+                        },
+                      })
+                    }
+                  />
+                  Text Overlay
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    checked={videoSettings?.config?.type === "image"}
+                    onChange={() =>
+                      handleVideoSettingsChange({
+                        ...videoSettings,
+                        config: {
+                          ...videoSettings.config,
+                          type: "image",
+                          imageUrl: "",
+                        },
+                      })
+                    }
+                  />
+                  Image
+                </label>
+              </div>
+              {videoSettings?.config?.type && (
+                <div className={styles.inputGroup}>
+                  <label>
+                    {videoSettings?.config?.type === "text"
+                      ? "Display Text"
+                      : "Image URL"}
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      videoSettings?.config?.type === "text"
+                        ? videoSettings?.config?.text
+                        : videoSettings?.config?.imageUrl
+                    }
+                    onChange={(e) =>
+                      handleVideoSettingsChange({
+                        ...videoSettings,
+                        config: {
+                          ...videoSettings.config!,
+                          [videoSettings?.config?.type === "text"
+                            ? "text"
+                            : "imageUrl"]: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder={
+                      videoSettings?.config?.type === "text"
+                        ? "Enter display text"
+                        : "Enter image URL"
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 const rootEl = document.getElementById("root");
 if (rootEl) {
-  const root = ReactDOM.createRoot(rootEl);
+  const root = createRoot(rootEl);
   root.render(
     <React.StrictMode>
       <Options />

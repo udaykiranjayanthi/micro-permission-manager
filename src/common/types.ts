@@ -31,3 +31,29 @@ export type DomainPermissions = Record<string, ServicePermission>;
 export type ExtensionPermissions = Record<string, DomainPermissions>;
 
 export type HostPermissions = Record<string, PermissionData>;
+
+export type LocationSettings = {
+  fakeLocation: boolean;
+  config?: {
+    type: "static" | "random";
+    latitude?: number;
+    longitude?: number;
+  };
+};
+
+export type VideoSettings = {
+  fakeVideo: boolean;
+  config?: {
+    type: "text" | "image";
+    text?: string;
+    imageUrl?: string;
+  };
+};
+
+export type LocalState = {
+  enabled: boolean;
+  theme: string;
+  permissions: ExtensionPermissions;
+  locationSettings: LocationSettings;
+  videoSettings: VideoSettings;
+};
