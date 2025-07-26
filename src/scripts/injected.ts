@@ -145,9 +145,8 @@ export function overrideMedia(): void {
 }
 
 export function overrideGeolocation(): void {
-  const original = navigator.geolocation.getCurrentPosition.bind(
-    navigator.geolocation
-  );
+  const originalGetCurrentPosition =
+    navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
 
   Object.defineProperty(navigator.geolocation, "getCurrentPosition", {
     value: async (...args: Parameters<Geolocation["getCurrentPosition"]>) => {
@@ -181,173 +180,74 @@ export function overrideGeolocation(): void {
 
       if (currentLocationSettings?.fakeLocation) {
         const location = getFakeLocation(currentLocationSettings);
-        console.log(location);
         successCallback(location);
         return;
       }
 
-      return original(...args);
+      return originalGetCurrentPosition(...args);
+    },
+    configurable: false,
+    writable: false,
+  });
+
+  const originalWatchPosition = navigator.geolocation.watchPosition.bind(
+    navigator.geolocation
+  );
+
+  Object.defineProperty(navigator.geolocation, "watchPosition", {
+    value: async (...args: Parameters<Geolocation["watchPosition"]>) => {
+      // Get the latest hostPermissions at call time
+      const currentPermissions = getHostPermissions();
+      const [successCallback, errorCallback] = args;
+
+      if (
+        currentPermissions[PERMISSION_NAMES.GEOLOCATION]?.status !==
+        PERMISSION_STATUS.ALLOWED
+      ) {
+        const response = await showPermissionModal(
+          PERMISSION_NAMES.GEOLOCATION
+        );
+
+        setPermission(PERMISSION_NAMES.GEOLOCATION, {
+          status: response.status,
+          scope: response.scope,
+        });
+
+        if (response.status === PERMISSION_STATUS.DENIED) {
+          errorCallback?.({
+            code: 1,
+            message: "User denied Geolocation",
+          } as GeolocationPositionError);
+          return;
+        }
+      }
+
+      const currentLocationSettings = getLocationSettings();
+
+      if (currentLocationSettings?.fakeLocation) {
+        const location = getFakeLocation(currentLocationSettings);
+
+        const intervalId = setInterval(() => {
+          successCallback(location);
+        }, 10000);
+
+        return intervalId;
+      }
+
+      return originalWatchPosition(...args);
+    },
+    configurable: false,
+    writable: false,
+  });
+
+  Object.defineProperty(navigator.geolocation, "clearWatch", {
+    value: function (watchId: number) {
+      clearInterval(watchId);
     },
     configurable: false,
     writable: false,
   });
 }
 
-// // Override geolocation API
-// const originalGeolocation = navigator.geolocation;
-// Object.defineProperty(navigator, "geolocation", {
-//   value: {
-//     getCurrentPosition: function (
-//       successCallback: PositionCallback,
-//       errorCallback?: PositionErrorCallback,
-//       options?: PositionOptions
-//     ) {
-//       const hostPermissions = getHostPermissions();
-//       if (hostPermissions?.geolocation?.status === "denied") {
-//         errorCallback?.({
-//           code: 1,
-//           message: "User denied Geolocation",
-//         } as GeolocationPositionError);
-//         return;
-//       }
-
-//       if (currentLocationSettings?.fakeLocation) {
-//         const coords =
-//           currentLocationSettings.config?.type === "random"
-//             ? {
-//                 latitude: Math.random() * 180 - 90,
-//                 longitude: Math.random() * 360 - 180,
-//                 accuracy: 100,
-//               }
-//             : {
-//                 latitude: currentLocationSettings.config?.latitude || 0,
-//                 longitude: currentLocationSettings.config?.longitude || 0,
-//                 accuracy: 100,
-//               };
-
-//         successCallback({
-//           coords: {
-//             ...coords,
-//             altitude: null,
-//             altitudeAccuracy: null,
-//             heading: null,
-//             speed: null,
-//           },
-//           timestamp: Date.now(),
-//         } as GeolocationPosition);
-//         return;
-//       }
-
-//       return originalGeolocation.getCurrentPosition(
-//         successCallback,
-//         errorCallback,
-//         options
-//       );
-//     },
-//     watchPosition: function (
-//       successCallback: PositionCallback,
-//       errorCallback?: PositionErrorCallback,
-//       options?: PositionOptions
-//     ) {
-//       const hostPermissions = getHostPermissions();
-//       if (hostPermissions?.geolocation?.status === "denied") {
-//         errorCallback?.({
-//           code: 1,
-//           message: "User denied Geolocation",
-//         } as GeolocationPositionError);
-//         return;
-//       }
-
-//       if (currentLocationSettings?.fakeLocation) {
-//         const intervalId = setInterval(() => {
-//           const coords =
-//             currentLocationSettings.config?.type === "random"
-//               ? {
-//                   latitude: Math.random() * 180 - 90,
-//                   longitude: Math.random() * 360 - 180,
-//                   accuracy: 100,
-//                 }
-//               : {
-//                   latitude: currentLocationSettings.config?.latitude || 0,
-//                   longitude: currentLocationSettings.config?.longitude || 0,
-//                   accuracy: 100,
-//                 };
-
-//           successCallback({
-//             coords: {
-//               ...coords,
-//               altitude: null,
-//               altitudeAccuracy: null,
-//               heading: null,
-//               speed: null,
-//             },
-//             timestamp: Date.now(),
-//           } as GeolocationPosition);
-//         }, 1000);
-
-//         return intervalId;
-//       }
-
-//       return originalGeolocation.watchPosition(
-//         successCallback,
-//         errorCallback,
-//         options
-//       );
-//     },
-//     clearWatch: originalGeolocation.clearWatch,
-//   },
-// });
-
-// // Override getUserMedia API
-// const originalGetUserMedia = navigator.mediaDevices.getUserMedia;
-// Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
-//   value: async function (constraints: MediaStreamConstraints) {
-//     const hostPermissions = getHostPermissions();
-//     if (hostPermissions?.camera?.status === "denied") {
-//       throw new Error("Permission denied");
-//     }
-
-//     if (currentVideoSettings?.fakeVideo && constraints.video) {
-//       const canvas = document.createElement("canvas");
-//       canvas.width = 640;
-//       canvas.height = 480;
-//       const ctx = canvas.getContext("2d");
-
-//       if (currentVideoSettings.config?.type === "text") {
-//         // Create text overlay
-//         ctx!.fillStyle = "#000000";
-//         ctx!.fillRect(0, 0, canvas.width, canvas.height);
-//         ctx!.fillStyle = "#ffffff";
-//         ctx!.font = "24px Arial";
-//         ctx!.textAlign = "center";
-//         ctx!.fillText(
-//           currentVideoSettings.config?.text || "Fake Camera",
-//           canvas.width / 2,
-//           canvas.height / 2
-//         );
-//       } else if (
-//         currentVideoSettings.config?.type === "image" &&
-//         currentVideoSettings.config?.imageUrl
-//       ) {
-//         // Load and draw image
-//         const img = new Image();
-//         img.crossOrigin = "anonymous";
-//         img.src = currentVideoSettings.config.imageUrl;
-//         await new Promise((resolve) => {
-//           img.onload = resolve;
-//           img.onerror = resolve;
-//         });
-//         ctx!.drawImage(img, 0, 0, canvas.width, canvas.height);
-//       }
-
-//       // Create video stream from canvas
-//       const stream = canvas.captureStream(30);
-//       return stream;
-//     }
-
-//     return originalGetUserMedia.call(this, constraints);
-//   },
-// });
-
-overrideMedia();
 overrideGeolocation();
+overrideMedia();

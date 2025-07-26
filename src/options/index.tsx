@@ -143,6 +143,9 @@ const Options: React.FC = () => {
                   handleLocationSettingsChange({
                     ...locationSettings,
                     fakeLocation: e.target.checked,
+                    config: {
+                      type: "random",
+                    },
                   })
                 }
                 label={locationSettings.fakeLocation ? "Enabled" : "Disabled"}
@@ -177,7 +180,7 @@ const Options: React.FC = () => {
                       })
                     }
                   />
-                  Static Location
+                  Custom Location
                 </label>
               </div>
               {locationSettings?.config?.type === "static" && (
@@ -245,6 +248,9 @@ const Options: React.FC = () => {
                   handleVideoSettingsChange({
                     ...videoSettings,
                     fakeVideo: e.target.checked,
+                    config: {
+                      type: "text",
+                    },
                   })
                 }
                 label={videoSettings.fakeVideo ? "Enabled" : "Disabled"}
