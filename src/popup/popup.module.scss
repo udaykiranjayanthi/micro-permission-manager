@@ -65,7 +65,6 @@ body {
   background-color: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 16px;
 }
 
 .tabInfo {
@@ -144,6 +143,7 @@ body {
   display: flex;
   justify-content: stretch;
   gap: 8px;
+  margin-top: 16px;
 
   button {
     flex: 1;
@@ -157,4 +157,11 @@ body {
   background-color: var(--color-bg-secondary);
   padding: 16px;
   border-radius: 8px;
+}
+
+.note {
+  opacity: 0.7;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
 }

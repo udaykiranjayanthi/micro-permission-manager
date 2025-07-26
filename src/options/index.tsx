@@ -332,6 +332,19 @@ const Options: React.FC = () => {
           )}
         </div>
       </div>
+
+      <footer className={styles.footer}>
+        <p>
+          © 2025 Permission Manager. Created by{" "}
+          <a
+            href="https://www.linkedin.com/in/uday-kiran-jayanthi/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Uday Kiran Jayanthi
+          </a>
+        </p>
+      </footer>
     </div>
   );
 };

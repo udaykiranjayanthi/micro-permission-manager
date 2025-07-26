@@ -163,10 +163,6 @@ function Popup() {
     chrome.runtime.openOptionsPage();
   };
 
-  const handleViewHistory = () => {
-    chrome.tabs.create({ url: "history.html" });
-  };
-
   const handleClearAll = async () => {
     await resetAllPermissions();
     const updatedPermissions = await getHostPermissions({
@@ -221,13 +217,15 @@ function Popup() {
               )}
             </div>
           </div>
+          {Object.entries(permissions).length > 0 && (
+            <div className={styles.note}>
+              Note: Changing permissions will take effect after page reload
+            </div>
+          )}
 
           <div className={styles.footer}>
             <Button variant="text" onClick={handleSettings}>
               Settings
-            </Button>
-            <Button variant="text" onClick={handleViewHistory}>
-              View History
             </Button>
             <Button variant="text" onClick={handleClearAll}>
               Clear All
