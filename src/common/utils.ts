@@ -136,54 +136,100 @@ export const getCurrentTab = async () => {
   return tab;
 };
 
-export const generateRandomCoordinates = () => {
-  // Generate random coordinates within reasonable bounds
-  const latitude = Math.random() * 180 - 90; // -90 to 90
-  const longitude = Math.random() * 360 - 180; // -180 to 180
-  return { latitude, longitude };
-};
+export const getFakeLocation = (
+  locationSettings: LocationSettings
+): GeolocationPosition => {
+  let longitude = locationSettings.config?.longitude || 0;
+  let latitude = locationSettings.config?.latitude || 0;
 
-export const createTextCanvas = (text: string): HTMLCanvasElement => {
-  const canvas = document.createElement("canvas");
-  canvas.width = 640;
-  canvas.height = 480;
-  const ctx = canvas.getContext("2d");
+  if (locationSettings.config?.type === "random") {
+    const randomCityCoordinates = [
+      { city: "Delhi", lat: 28.6138952, lng: 77.2090057 },
+      { city: "Mumbai", lat: 19.0760905, lng: 72.8774267 },
+      { city: "Bangalore", lat: 12.9715987, lng: 77.5945627 },
+      { city: "Chennai", lat: 13.0826802, lng: 80.2707184 },
+      { city: "Hyderabad", lat: 17.385044, lng: 78.486671 },
+      { city: "Kolkata", lat: 22.572645, lng: 88.3638926 },
+    ];
+    const randomCity =
+      randomCityCoordinates[
+        Math.floor(Math.random() * randomCityCoordinates.length)
+      ];
 
-  if (ctx) {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "24px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    longitude = randomCity.lng;
+    latitude = randomCity.lat;
   }
 
-  return canvas;
+  return {
+    coords: {
+      latitude,
+      longitude,
+      accuracy: 80,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+      toJSON: () => "",
+    },
+    timestamp: Date.now(),
+    toJSON: () => "",
+  };
 };
 
 export const createImageStream = async (
-  imageUrl: string
-): Promise<HTMLCanvasElement> => {
+  videoSettings: VideoSettings
+): Promise<MediaStream> => {
   const canvas = document.createElement("canvas");
-  canvas.width = 640;
-  canvas.height = 480;
+  canvas.width = 1920;
+  canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  if (ctx) {
+  if (ctx && videoSettings.config?.imageUrl) {
     const img = new Image();
     img.crossOrigin = "anonymous";
 
     await new Promise((resolve, reject) => {
       img.onload = resolve;
       img.onerror = reject;
-      img.src = imageUrl;
+      img.src = videoSettings.config?.imageUrl || "";
     });
 
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.scale(-1, 1);
+  } else if (ctx && videoSettings.config?.type === "text") {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      videoSettings.config?.text || "Fake Camera",
+      canvas.width / 2,
+      canvas.height / 2
+    );
+
+    setInterval(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Flip horizontally
+      ctx.save(); // Save current context state
+      ctx.scale(-1, 1); // Flip horizontally
+      ctx.translate(-canvas.width, 0); // Move origin back into visible area
+
+      // Draw your content
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "white";
+      ctx.font = "90px Inter";
+      ctx.fillText(
+        videoSettings.config?.text || "PLACEHOLDER",
+        canvas.width / 2,
+        canvas.height / 2
+      );
+
+      ctx.restore(); // Restore context state (unflipped)
+    }, 100);
   }
 
-  return canvas;
+  return canvas.captureStream(10);
 };
 
 export const getVideoSettings = async (): Promise<VideoSettings> => {

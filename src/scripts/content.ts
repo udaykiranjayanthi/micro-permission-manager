@@ -2,6 +2,8 @@ import {
   getHostPermissions,
   getTheme,
   updateHostPermissions,
+  getLocationSettings,
+  getVideoSettings,
 } from "../common/utils";
 
 function injectScript(fileName: string) {
@@ -84,6 +86,30 @@ window.addEventListener("message", (event) => {
         {
           type: "HOST_PERMISSIONS_RESPONSE",
           hostPermissions,
+        },
+        "*"
+      );
+    });
+  }
+
+  if (type === "GET_LOCATION_SETTINGS_FROM_EXTENSION") {
+    getLocationSettings().then((locationSettings) => {
+      window.postMessage(
+        {
+          type: "LOCATION_SETTINGS_RESPONSE",
+          locationSettings,
+        },
+        "*"
+      );
+    });
+  }
+
+  if (type === "GET_VIDEO_SETTINGS_FROM_EXTENSION") {
+    getVideoSettings().then((videoSettings) => {
+      window.postMessage(
+        {
+          type: "VIDEO_SETTINGS_RESPONSE",
+          videoSettings,
         },
         "*"
       );
