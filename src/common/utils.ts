@@ -194,8 +194,31 @@ export const createImageStream = async (
       img.src = videoSettings.config?.imageUrl || "";
     });
 
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // Calculate image aspect ratio
+    const imgAspect = img.width / img.height;
+    const canvasAspect = canvas.width / canvas.height;
+
+    let drawWidth, drawHeight, offsetX, offsetY;
+
+    if (imgAspect > canvasAspect) {
+      // Image is wider than canvas — scale by height
+      drawHeight = canvas.height;
+      drawWidth = img.width * (canvas.height / img.height);
+    } else {
+      // Image is taller than canvas — scale by width
+      drawWidth = canvas.width;
+      drawHeight = img.height * (canvas.width / img.width);
+    }
+
+    // Center the image
+    offsetX = (canvas.width - drawWidth) / 2;
+    offsetY = (canvas.height - drawHeight) / 2;
+
+    // Flip horizontally
+    ctx.save();
     ctx.scale(-1, 1);
+    ctx.drawImage(img, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
+    ctx.restore();
   } else if (ctx && videoSettings.config?.type === "text") {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
