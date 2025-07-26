@@ -6,7 +6,7 @@ import {
 } from "../common/types";
 import { PERMISSION_NAMES, PERMISSION_STATUS } from "../common/constants";
 import { showPermissionModal } from "../dialog";
-import { createImageStream, getFakeLocation } from "../common/utils";
+import { createVideoStream, getFakeLocation } from "../common/utils";
 
 const hostname = window.location.hostname;
 let sessionId = "";
@@ -133,7 +133,7 @@ export function overrideMedia(): void {
       const currentVideoSettings = getVideoSettings();
 
       if (videoConstraints && currentVideoSettings?.fakeVideo) {
-        const stream = await createImageStream(currentVideoSettings);
+        const stream = await createVideoStream(getVideoSettings);
         return stream;
       }
 

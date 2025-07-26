@@ -36,6 +36,18 @@ chrome.storage.local.onChanged.addListener((changes) => {
       "*"
     );
   }
+
+  if (changes.videoSettings?.newValue) {
+    const newVideoSettings = changes.videoSettings.newValue;
+
+    window.postMessage(
+      {
+        type: "VIDEO_SETTINGS_RESPONSE",
+        videoSettings: newVideoSettings,
+      },
+      "*"
+    );
+  }
 });
 
 window.addEventListener("message", (event) => {

@@ -176,79 +176,97 @@ export const getFakeLocation = (
   };
 };
 
-export const createImageStream = async (
-  videoSettings: VideoSettings
+const renderImageOnCanvas = async (
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  imageUrl: string
+) => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = imageUrl;
+  });
+
+  // Calculate image aspect ratio
+  const imgAspect = img.width / img.height;
+  const canvasAspect = canvas.width / canvas.height;
+
+  let drawWidth, drawHeight, offsetX, offsetY;
+
+  if (imgAspect > canvasAspect) {
+    // Image is wider than canvas — scale by height
+    drawHeight = canvas.height;
+    drawWidth = img.width * (canvas.height / img.height);
+  } else {
+    // Image is taller than canvas — scale by width
+    drawWidth = canvas.width;
+    drawHeight = img.height * (canvas.width / img.width);
+  }
+
+  // Center the image
+  offsetX = (canvas.width - drawWidth) / 2;
+  offsetY = (canvas.height - drawHeight) / 2;
+
+  // Flip horizontally
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.drawImage(img, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
+  ctx.restore();
+};
+
+const renderTextOnCanvas = (
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  text: string
+) => {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Flip horizontally
+  ctx.save(); // Save current context state
+  ctx.scale(-1, 1); // Flip horizontally
+  ctx.translate(-canvas.width, 0); // Move origin back into visible area
+
+  // Draw your content
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "white";
+  ctx.font = "90px Inter";
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  ctx.restore(); // Restore context state (unflipped)
+};
+
+export const createVideoStream = async (
+  getVideoSettings: () => VideoSettings | null
 ): Promise<MediaStream> => {
   const canvas = document.createElement("canvas");
   canvas.width = 1920;
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  if (ctx && videoSettings.config?.imageUrl) {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-      img.src = videoSettings.config?.imageUrl || "";
-    });
-
-    // Calculate image aspect ratio
-    const imgAspect = img.width / img.height;
-    const canvasAspect = canvas.width / canvas.height;
-
-    let drawWidth, drawHeight, offsetX, offsetY;
-
-    if (imgAspect > canvasAspect) {
-      // Image is wider than canvas — scale by height
-      drawHeight = canvas.height;
-      drawWidth = img.width * (canvas.height / img.height);
-    } else {
-      // Image is taller than canvas — scale by width
-      drawWidth = canvas.width;
-      drawHeight = img.height * (canvas.width / img.width);
-    }
-
-    // Center the image
-    offsetX = (canvas.width - drawWidth) / 2;
-    offsetY = (canvas.height - drawHeight) / 2;
-
-    // Flip horizontally
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(img, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
-    ctx.restore();
-  } else if (ctx && videoSettings.config?.type === "text") {
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      videoSettings.config?.text || "Fake Camera",
-      canvas.width / 2,
-      canvas.height / 2
-    );
-
+  if (ctx) {
     setInterval(() => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Flip horizontally
-      ctx.save(); // Save current context state
-      ctx.scale(-1, 1); // Flip horizontally
-      ctx.translate(-canvas.width, 0); // Move origin back into visible area
-
-      // Draw your content
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "white";
-      ctx.font = "90px Inter";
-      ctx.fillText(
-        videoSettings.config?.text || "PLACEHOLDER",
-        canvas.width / 2,
-        canvas.height / 2
-      );
-
-      ctx.restore(); // Restore context state (unflipped)
+      const currentVideoSettings = getVideoSettings();
+      // image
+      if (currentVideoSettings?.config?.imageUrl) {
+        renderImageOnCanvas(ctx, canvas, currentVideoSettings.config?.imageUrl);
+      }
+      // text
+      if (currentVideoSettings?.config?.type === "text") {
+        renderTextOnCanvas(
+          ctx,
+          canvas,
+          currentVideoSettings.config?.text || "PLACEHOLDER"
+        );
+      }
     }, 100);
   }
 
