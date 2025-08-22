@@ -260,9 +260,28 @@ export const createVideoStream = async (
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
   let previousSettings = "";
+  let videoElement: HTMLVideoElement | null = null;
 
   if (ctx) {
+    const cleanup = (clearCanvas = true) => {
+      if (videoElement) {
+        videoElement.pause();
+        videoElement.srcObject = null;
+        videoElement.src = "";
+        videoElement.load();
+        videoElement.remove();
+        videoElement = null;
+      }
+      // Only clear the canvas if requested
+      if (clearCanvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    };
+
     const renderCurrentStream = (settings: VideoSettings | null) => {
+      // Clean up previous state, but only clear canvas for video
+      cleanup(settings?.config?.type === "video-upload");
+
       // image url
       if (settings?.config?.type === "image-url" && settings.config.imageUrl) {
         renderImageOnCanvas(
@@ -273,7 +292,7 @@ export const createVideoStream = async (
         );
       }
       // uploaded image
-      if (
+      else if (
         settings?.config?.type === "image-upload" &&
         settings.config.imageData
       ) {
@@ -284,8 +303,56 @@ export const createVideoStream = async (
           settings.mirrorVideo
         );
       }
+      // uploaded video
+      else if (
+        settings?.config?.type === "video-upload" &&
+        settings.config.videoData
+      ) {
+        videoElement = document.createElement("video");
+        videoElement.autoplay = true;
+        videoElement.loop = true;
+        videoElement.muted = true;
+        videoElement.playsInline = true;
+
+        // Set up event listeners before setting src
+        videoElement.addEventListener("loadedmetadata", () => {
+          // Start playing once metadata is loaded
+          videoElement?.play().catch(console.error);
+        });
+
+        const renderVideo = () => {
+          if (videoElement && settings.config?.type === "video-upload") {
+            // Clear the canvas first
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (settings.mirrorVideo) {
+              ctx.save();
+              ctx.scale(-1, 1);
+              ctx.drawImage(
+                videoElement,
+                -canvas.width,
+                0,
+                canvas.width,
+                canvas.height
+              );
+              ctx.restore();
+            } else {
+              ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            }
+            requestAnimationFrame(renderVideo);
+          }
+        };
+
+        // Start the render loop when video starts playing
+        videoElement.addEventListener("play", () => {
+          renderVideo();
+        });
+
+        // Set the source last
+        videoElement.src = settings.config.videoData;
+      }
       // text
-      if (settings?.config?.type === "text") {
+      else if (settings?.config?.type === "text") {
         renderTextOnCanvas(
           ctx,
           canvas,
@@ -295,7 +362,7 @@ export const createVideoStream = async (
       }
     };
 
-    setInterval(() => {
+    const interval = setInterval(() => {
       const currentVideoSettings = getVideoSettings();
 
       // render only if settings changes
@@ -304,9 +371,18 @@ export const createVideoStream = async (
         previousSettings = JSON.stringify(currentVideoSettings);
       }
     }, 100);
+
+    // Return a cleanup function
+    const stream = canvas.captureStream(30);
+    stream.getVideoTracks()[0].onended = () => {
+      clearInterval(interval);
+      cleanup(true);
+    };
+
+    return stream;
   }
 
-  return canvas.captureStream(10);
+  return canvas.captureStream(30);
 };
 
 export const getVideoSettings = async (): Promise<VideoSettings> => {

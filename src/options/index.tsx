@@ -277,7 +277,7 @@ const Options: React.FC = () => {
                       })
                     }
                   />
-                  Text Overlay
+                  Text
                 </label>
                 <label>
                   <input
@@ -311,6 +311,22 @@ const Options: React.FC = () => {
                   />
                   Upload Image
                 </label>
+                <label>
+                  <input
+                    type="radio"
+                    checked={videoSettings?.config?.type === "video-upload"}
+                    onChange={() =>
+                      handleVideoSettingsChange({
+                        ...videoSettings,
+                        config: {
+                          ...videoSettings.config,
+                          type: "video-upload" as const,
+                        },
+                      })
+                    }
+                  />
+                  Upload Video
+                </label>
               </div>
               {videoSettings?.config?.type && (
                 <div className={styles.inputGroup}>
@@ -319,7 +335,9 @@ const Options: React.FC = () => {
                       ? "Display Text"
                       : videoSettings?.config?.type === "image-url"
                       ? "Image URL"
-                      : "Choose Image"}
+                      : videoSettings?.config?.type === "image-upload"
+                      ? "Choose Image"
+                      : "Choose Video"}
                   </label>
                   {videoSettings?.config?.type === "text" ? (
                     <input
@@ -351,7 +369,7 @@ const Options: React.FC = () => {
                       }
                       placeholder="Enter image URL"
                     />
-                  ) : (
+                  ) : videoSettings?.config?.type === "image-upload" ? (
                     <div className={styles.fileInput}>
                       <input
                         type="file"
@@ -380,7 +398,36 @@ const Options: React.FC = () => {
                         </span>
                       )}
                     </div>
-                  )}
+                  ) : videoSettings?.config?.type === "video-upload" ? (
+                    <div className={styles.fileInput}>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              handleVideoSettingsChange({
+                                ...videoSettings,
+                                config: {
+                                  ...videoSettings.config!,
+                                  videoData: reader.result as string,
+                                  videoFileName: file.name,
+                                },
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      {videoSettings?.config?.videoFileName && (
+                        <span className={styles.fileName}>
+                          {videoSettings.config.videoFileName}
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>

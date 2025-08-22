@@ -45,11 +45,13 @@ export type VideoSettings = {
   fakeVideo: boolean;
   mirrorVideo: boolean;
   config: {
-    type: "text" | "image-url" | "image-upload";
+    type: "text" | "image-url" | "image-upload" | "video-upload";
     text?: string;
     imageUrl?: string;
     imageData?: string;
+    videoData?: string;
     imageFileName?: string;
+    videoFileName?: string;
   } | null;
 };
 
