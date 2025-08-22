@@ -263,12 +263,21 @@ export const createVideoStream = async (
   if (ctx) {
     setInterval(() => {
       const currentVideoSettings = getVideoSettings();
-      // image
-      if (currentVideoSettings?.config?.imageUrl) {
+      // image url
+      if (currentVideoSettings?.config?.type === "image-url" && currentVideoSettings.config.imageUrl) {
         renderImageOnCanvas(
           ctx,
           canvas,
-          currentVideoSettings.config?.imageUrl,
+          currentVideoSettings.config.imageUrl,
+          currentVideoSettings.mirrorVideo
+        );
+      }
+      // uploaded image
+      if (currentVideoSettings?.config?.type === "image-upload" && currentVideoSettings.config.imageData) {
+        renderImageOnCanvas(
+          ctx,
+          canvas,
+          currentVideoSettings.config.imageData,
           currentVideoSettings.mirrorVideo
         );
       }

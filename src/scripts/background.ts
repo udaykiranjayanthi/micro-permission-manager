@@ -12,6 +12,7 @@ chrome.runtime.onInstalled.addListener(() => {
     videoSettings: {
       mirrorVideo: false,
       fakeVideo: false,
+      config: null,
     },
   };
   chrome.storage.local.set(defaultState);

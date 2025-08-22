@@ -24,6 +24,7 @@ const Options: React.FC = () => {
   const [videoSettings, setVideoSettings] = useState<VideoSettings>({
     fakeVideo: false,
     mirrorVideo: true,
+    config: null,
   });
 
   useEffect(() => {
@@ -270,7 +271,7 @@ const Options: React.FC = () => {
                       handleVideoSettingsChange({
                         ...videoSettings,
                         config: {
-                          type: "text",
+                          type: "text" as const,
                           text: "",
                         },
                       })
@@ -281,19 +282,34 @@ const Options: React.FC = () => {
                 <label>
                   <input
                     type="radio"
-                    checked={videoSettings?.config?.type === "image"}
+                    checked={videoSettings?.config?.type === "image-url"}
                     onChange={() =>
                       handleVideoSettingsChange({
                         ...videoSettings,
                         config: {
-                          ...videoSettings.config,
-                          type: "image",
+                          type: "image-url" as const,
                           imageUrl: "",
                         },
                       })
                     }
                   />
-                  Image
+                  Image URL
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    checked={videoSettings?.config?.type === "image-upload"}
+                    onChange={() =>
+                      handleVideoSettingsChange({
+                        ...videoSettings,
+                        config: {
+                          type: "image-upload" as const,
+                          imageData: "",
+                        },
+                      })
+                    }
+                  />
+                  Upload Image
                 </label>
               </div>
               {videoSettings?.config?.type && (
@@ -301,32 +317,62 @@ const Options: React.FC = () => {
                   <label>
                     {videoSettings?.config?.type === "text"
                       ? "Display Text"
-                      : "Image URL"}
+                      : videoSettings?.config?.type === "image-url"
+                      ? "Image URL"
+                      : "Choose Image"}
                   </label>
-                  <input
-                    type="text"
-                    value={
-                      videoSettings?.config?.type === "text"
-                        ? videoSettings?.config?.text
-                        : videoSettings?.config?.imageUrl
-                    }
-                    onChange={(e) =>
-                      handleVideoSettingsChange({
-                        ...videoSettings,
-                        config: {
-                          ...videoSettings.config!,
-                          [videoSettings?.config?.type === "text"
-                            ? "text"
-                            : "imageUrl"]: e.target.value,
-                        },
-                      })
-                    }
-                    placeholder={
-                      videoSettings?.config?.type === "text"
-                        ? "Enter display text"
-                        : "Enter image URL"
-                    }
-                  />
+                  {videoSettings?.config?.type === "text" ? (
+                    <input
+                      type="text"
+                      value={videoSettings?.config?.text || ""}
+                      onChange={(e) =>
+                        handleVideoSettingsChange({
+                          ...videoSettings,
+                          config: {
+                            type: "text" as const,
+                            text: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Enter display text"
+                    />
+                  ) : videoSettings?.config?.type === "image-url" ? (
+                    <input
+                      type="text"
+                      value={videoSettings?.config?.imageUrl || ""}
+                      onChange={(e) =>
+                        handleVideoSettingsChange({
+                          ...videoSettings,
+                          config: {
+                            type: "image-url" as const,
+                            imageUrl: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Enter image URL"
+                    />
+                  ) : (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            handleVideoSettingsChange({
+                              ...videoSettings,
+                              config: {
+                                type: "image-upload" as const,
+                                imageData: reader.result as string,
+                              },
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               )}
             </div>

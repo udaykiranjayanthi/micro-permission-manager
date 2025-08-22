@@ -44,11 +44,12 @@ export type LocationSettings = {
 export type VideoSettings = {
   fakeVideo: boolean;
   mirrorVideo: boolean;
-  config?: {
-    type: "text" | "image";
+  config: {
+    type: "text" | "image-url" | "image-upload";
     text?: string;
     imageUrl?: string;
-  };
+    imageData?: string;
+  } | null;
 };
 
 export type LocalState = {
