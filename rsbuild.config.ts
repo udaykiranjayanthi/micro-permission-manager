@@ -33,6 +33,9 @@ export default defineConfig({
       },
     },
   },
+  html: {
+    title: "Micro Permission Manager",
+  },
   plugins: [pluginSass(), pluginReact()],
   tools: {
     rspack: {

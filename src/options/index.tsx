@@ -355,20 +355,27 @@ const Options: React.FC = () => {
                       placeholder="Enter display text"
                     />
                   ) : videoSettings?.config?.type === "image-url" ? (
-                    <input
-                      type="text"
-                      value={videoSettings?.config?.imageUrl || ""}
-                      onChange={(e) =>
-                        handleVideoSettingsChange({
-                          ...videoSettings,
-                          config: {
-                            ...videoSettings.config!,
-                            imageUrl: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="Enter image URL"
-                    />
+                    <div className={styles.fileInput}>
+                      <input
+                        type="text"
+                        value={videoSettings?.config?.imageUrl || ""}
+                        onChange={(e) =>
+                          handleVideoSettingsChange({
+                            ...videoSettings,
+                            config: {
+                              ...videoSettings.config!,
+                              imageUrl: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Enter image URL"
+                      />
+                      {videoSettings?.config?.imageUrl && (
+                        <span className={styles.fileName}>
+                          Some external urls might not work
+                        </span>
+                      )}
+                    </div>
                   ) : videoSettings?.config?.type === "image-upload" ? (
                     <div className={styles.fileInput}>
                       <input

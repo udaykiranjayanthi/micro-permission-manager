@@ -176,6 +176,57 @@ export const getFakeLocation = (
   };
 };
 
+const renderVideoOnCanvas = (
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  videoElement: HTMLVideoElement,
+  mirrorVideo: boolean
+) => {
+  // Clear the canvas first
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Calculate dimensions maintaining aspect ratio
+  const videoAspect = videoElement.videoWidth / videoElement.videoHeight;
+  const canvasAspect = canvas.width / canvas.height;
+  
+  let drawWidth, drawHeight, offsetX, offsetY;
+  
+  if (videoAspect > canvasAspect) {
+    // Video is wider than canvas
+    drawWidth = canvas.width;
+    drawHeight = canvas.width / videoAspect;
+  } else {
+    // Video is taller than canvas
+    drawHeight = canvas.height;
+    drawWidth = canvas.height * videoAspect;
+  }
+  
+  // Center the video
+  offsetX = (canvas.width - drawWidth) / 2;
+  offsetY = (canvas.height - drawHeight) / 2;
+
+  if (mirrorVideo) {
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(
+      videoElement,
+      -offsetX - drawWidth,
+      offsetY,
+      drawWidth,
+      drawHeight
+    );
+    ctx.restore();
+  } else {
+    ctx.drawImage(
+      videoElement,
+      offsetX,
+      offsetY,
+      drawWidth,
+      drawHeight
+    );
+  }
+};
+
 const renderImageOnCanvas = async (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
@@ -320,33 +371,14 @@ export const createVideoStream = async (
           videoElement?.play().catch(console.error);
         });
 
-        const renderVideo = () => {
+        const renderVideoFrame = () => {
           if (videoElement && settings.config?.type === "video-upload") {
-            // Clear the canvas first
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (settings.mirrorVideo) {
-              ctx.save();
-              ctx.scale(-1, 1);
-              ctx.drawImage(
-                videoElement,
-                -canvas.width,
-                0,
-                canvas.width,
-                canvas.height
-              );
-              ctx.restore();
-            } else {
-              ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            }
-            requestAnimationFrame(renderVideo);
+            renderVideoOnCanvas(ctx, canvas, videoElement, settings.mirrorVideo);
+            requestAnimationFrame(renderVideoFrame);
           }
         };
 
-        // Start the render loop when video starts playing
-        videoElement.addEventListener("play", () => {
-          renderVideo();
-        });
+        videoElement.addEventListener("play", renderVideoFrame);
 
         // Set the source last
         videoElement.src = settings.config.videoData;
