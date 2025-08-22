@@ -259,36 +259,49 @@ export const createVideoStream = async (
   canvas.width = 1920;
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
+  let previousSettings = "";
 
   if (ctx) {
-    setInterval(() => {
-      const currentVideoSettings = getVideoSettings();
+    const renderCurrentStream = (settings: VideoSettings | null) => {
       // image url
-      if (currentVideoSettings?.config?.type === "image-url" && currentVideoSettings.config.imageUrl) {
+      if (settings?.config?.type === "image-url" && settings.config.imageUrl) {
         renderImageOnCanvas(
           ctx,
           canvas,
-          currentVideoSettings.config.imageUrl,
-          currentVideoSettings.mirrorVideo
+          settings.config.imageUrl,
+          settings.mirrorVideo
         );
       }
       // uploaded image
-      if (currentVideoSettings?.config?.type === "image-upload" && currentVideoSettings.config.imageData) {
+      if (
+        settings?.config?.type === "image-upload" &&
+        settings.config.imageData
+      ) {
         renderImageOnCanvas(
           ctx,
           canvas,
-          currentVideoSettings.config.imageData,
-          currentVideoSettings.mirrorVideo
+          settings.config.imageData,
+          settings.mirrorVideo
         );
       }
       // text
-      if (currentVideoSettings?.config?.type === "text") {
+      if (settings?.config?.type === "text") {
         renderTextOnCanvas(
           ctx,
           canvas,
-          currentVideoSettings.config?.text || "PLACEHOLDER",
-          currentVideoSettings.mirrorVideo
+          settings.config?.text || "PLACEHOLDER",
+          settings.mirrorVideo
         );
+      }
+    };
+
+    setInterval(() => {
+      const currentVideoSettings = getVideoSettings();
+
+      // render only if settings changes
+      if (JSON.stringify(currentVideoSettings) !== previousSettings) {
+        renderCurrentStream(currentVideoSettings);
+        previousSettings = JSON.stringify(currentVideoSettings);
       }
     }, 100);
   }

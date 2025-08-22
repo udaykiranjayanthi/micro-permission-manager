@@ -166,17 +166,29 @@ body {
       }
 
       input[type="text"],
-      input[type="number"] {
+      input[type="number"],
+      input[type="file"] {
         width: 20rem;
         padding: 0.5rem;
         border: 1px solid var(--color-border);
         border-radius: 4px;
         background: var(--color-bg-secondary);
         color: var(--color-text);
+        font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 
         &:focus {
           outline: none;
           border-color: var(--color-border);
+        }
+
+        &::file-selector-button {
+          border: none;
+          padding: 0;
+          padding-right: 0.5rem;
+          border-radius: 0;
+          background-color: transparent;
+          font-weight: bold;
+          color: var(--color-text);
         }
       }
     }
@@ -193,7 +205,7 @@ body {
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
   text-align: center;
-  
+
   p {
     margin: 0;
     font-size: 0.875rem;
@@ -203,7 +215,7 @@ body {
   a {
     color: var(--color-text);
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }

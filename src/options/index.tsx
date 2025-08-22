@@ -271,8 +271,8 @@ const Options: React.FC = () => {
                       handleVideoSettingsChange({
                         ...videoSettings,
                         config: {
+                          ...videoSettings.config,
                           type: "text" as const,
-                          text: "",
                         },
                       })
                     }
@@ -287,8 +287,8 @@ const Options: React.FC = () => {
                       handleVideoSettingsChange({
                         ...videoSettings,
                         config: {
+                          ...videoSettings.config,
                           type: "image-url" as const,
-                          imageUrl: "",
                         },
                       })
                     }
@@ -303,8 +303,8 @@ const Options: React.FC = () => {
                       handleVideoSettingsChange({
                         ...videoSettings,
                         config: {
+                          ...videoSettings.config,
                           type: "image-upload" as const,
-                          imageData: "",
                         },
                       })
                     }
@@ -329,7 +329,7 @@ const Options: React.FC = () => {
                         handleVideoSettingsChange({
                           ...videoSettings,
                           config: {
-                            type: "text" as const,
+                            ...videoSettings.config!,
                             text: e.target.value,
                           },
                         })
@@ -344,7 +344,7 @@ const Options: React.FC = () => {
                         handleVideoSettingsChange({
                           ...videoSettings,
                           config: {
-                            type: "image-url" as const,
+                            ...videoSettings.config!,
                             imageUrl: e.target.value,
                           },
                         })
@@ -363,7 +363,7 @@ const Options: React.FC = () => {
                             handleVideoSettingsChange({
                               ...videoSettings,
                               config: {
-                                type: "image-upload" as const,
+                                ...videoSettings.config!,
                                 imageData: reader.result as string,
                               },
                             });
