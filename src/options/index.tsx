@@ -352,26 +352,34 @@ const Options: React.FC = () => {
                       placeholder="Enter image URL"
                     />
                   ) : (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            handleVideoSettingsChange({
-                              ...videoSettings,
-                              config: {
-                                ...videoSettings.config!,
-                                imageData: reader.result as string,
-                              },
-                            });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
+                    <div className={styles.fileInput}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              handleVideoSettingsChange({
+                                ...videoSettings,
+                                config: {
+                                  ...videoSettings.config!,
+                                  imageData: reader.result as string,
+                                  imageFileName: file.name,
+                                },
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      {videoSettings?.config?.imageFileName && (
+                        <span className={styles.fileName}>
+                          {videoSettings.config.imageFileName}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

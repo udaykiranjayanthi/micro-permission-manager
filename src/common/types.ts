@@ -49,6 +49,7 @@ export type VideoSettings = {
     text?: string;
     imageUrl?: string;
     imageData?: string;
+    imageFileName?: string;
   } | null;
 };
 
