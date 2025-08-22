@@ -10,6 +10,7 @@ chrome.runtime.onInstalled.addListener(() => {
       fakeLocation: false,
     },
     videoSettings: {
+      mirrorVideo: false,
       fakeVideo: false,
     },
   };

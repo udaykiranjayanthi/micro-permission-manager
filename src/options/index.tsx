@@ -23,6 +23,7 @@ const Options: React.FC = () => {
   });
   const [videoSettings, setVideoSettings] = useState<VideoSettings>({
     fakeVideo: false,
+    mirrorVideo: true,
   });
 
   useEffect(() => {
@@ -330,6 +331,28 @@ const Options: React.FC = () => {
               )}
             </div>
           )}
+        </div>
+
+        <div className={styles.setting}>
+          <div className={styles.settingHead}>
+            <div className={styles.settingInfo}>
+              <h3>Mirror Video</h3>
+              <p>Mirror the fake video feed horizontally</p>
+            </div>
+            <div className={styles.settingControl}>
+              <Switch
+                id="mirror-video"
+                checked={videoSettings.mirrorVideo}
+                onChange={(e) =>
+                  handleVideoSettingsChange({
+                    ...videoSettings,
+                    mirrorVideo: e.target.checked,
+                  })
+                }
+                label={videoSettings.mirrorVideo ? "Enabled" : "Disabled"}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

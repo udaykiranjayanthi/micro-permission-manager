@@ -179,7 +179,8 @@ export const getFakeLocation = (
 const renderImageOnCanvas = async (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
-  imageUrl: string
+  imageUrl: string,
+  mirrorVideo: boolean
 ) => {
   const img = new Image();
   img.crossOrigin = "anonymous";
@@ -210,17 +211,22 @@ const renderImageOnCanvas = async (
   offsetX = (canvas.width - drawWidth) / 2;
   offsetY = (canvas.height - drawHeight) / 2;
 
-  // Flip horizontally
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(img, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
-  ctx.restore();
+  if (mirrorVideo) {
+    // Flip horizontally
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
+    ctx.restore();
+  } else {
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  }
 };
 
 const renderTextOnCanvas = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
-  text: string
+  text: string,
+  mirrorVideo: boolean
 ) => {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -228,10 +234,12 @@ const renderTextOnCanvas = (
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Flip horizontally
-  ctx.save(); // Save current context state
-  ctx.scale(-1, 1); // Flip horizontally
-  ctx.translate(-canvas.width, 0); // Move origin back into visible area
+  if (mirrorVideo) {
+    // Flip horizontally
+    ctx.save(); // Save current context state
+    ctx.scale(-1, 1); // Flip horizontally
+    ctx.translate(-canvas.width, 0); // Move origin back into visible area
+  }
 
   // Draw your content
   ctx.fillStyle = "black";
@@ -257,14 +265,20 @@ export const createVideoStream = async (
       const currentVideoSettings = getVideoSettings();
       // image
       if (currentVideoSettings?.config?.imageUrl) {
-        renderImageOnCanvas(ctx, canvas, currentVideoSettings.config?.imageUrl);
+        renderImageOnCanvas(
+          ctx,
+          canvas,
+          currentVideoSettings.config?.imageUrl,
+          currentVideoSettings.mirrorVideo
+        );
       }
       // text
       if (currentVideoSettings?.config?.type === "text") {
         renderTextOnCanvas(
           ctx,
           canvas,
-          currentVideoSettings.config?.text || "PLACEHOLDER"
+          currentVideoSettings.config?.text || "PLACEHOLDER",
+          currentVideoSettings.mirrorVideo
         );
       }
     }, 100);

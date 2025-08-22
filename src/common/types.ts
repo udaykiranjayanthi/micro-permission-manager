@@ -43,6 +43,7 @@ export type LocationSettings = {
 
 export type VideoSettings = {
   fakeVideo: boolean;
+  mirrorVideo: boolean;
   config?: {
     type: "text" | "image";
     text?: string;
